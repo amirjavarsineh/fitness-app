@@ -6,6 +6,7 @@ import { useThemeStore } from '../../store/theme.store';
 const navItems = [
   { to: '/dashboard', label: 'داشبورد', icon: '📊' },
   { to: '/level', label: 'سطح و امتیاز', icon: '⭐' },
+  { to: '/prediction', label: 'پیش‌بینی', icon: '🎯' },
   { to: '/workouts', label: 'تمرینات', icon: '💪' },
   { to: '/nutrition', label: 'تغذیه', icon: '🍎' },
   { to: '/water', label: 'آب', icon: '💧' },

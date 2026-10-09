@@ -22,6 +22,7 @@ import measurementRouter from './routes/measurement.routes';
 import reminderRouter from './routes/reminder.routes';
 import challengeRouter from './routes/challenge.routes';
 import xpRouter from './routes/xp.routes';
+import predictionRouter from './routes/prediction.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -113,6 +114,7 @@ app.use('/api/measurements', measurementRouter);
 app.use('/api/reminders', reminderRouter);
 app.use('/api/challenges', challengeRouter);
 app.use('/api/xp', xpRouter);
+app.use('/api/predictions', predictionRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
