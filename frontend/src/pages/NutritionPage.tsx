@@ -5,6 +5,7 @@ import {
   type MealType,
   type CreateNutritionInput,
 } from '../services/nutrition.service';
+import FoodPicker from '../components/FoodPicker';
 
 const MEAL_TYPES: { value: MealType; label: string; emoji: string; color: string }[] = [
   { value: 'BREAKFAST', label: 'صبحانه', emoji: '🌅', color: 'from-orange-400 to-yellow-400' },
@@ -131,7 +132,9 @@ export default function NutritionPage() {
       {/* Form */}
       {showForm && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-6 animate-scale-in">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">افزودن غذا</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>🍽️</span> افزودن غذا
+          </h2>
 
           {error && (
             <div className="mb-4 flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm animate-wiggle">
@@ -141,18 +144,29 @@ export default function NutritionPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Food Name */}
+            {/* Food Picker */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                نام غذا *
+                جستجو در کاتالوگ غذاها 🍎
               </label>
-              <input
-                type="text"
+              <FoodPicker
                 value={form.foodName}
-                onChange={(e) => setForm({ ...form, foodName: e.target.value })}
-                placeholder="مثلاً برنج با مرغ"
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                onChange={(name) => setForm({ ...form, foodName: name })}
+                onSelect={(food) => {
+                  setForm({
+                    ...form,
+                    foodName: food.nameFa,
+                    calories: food.calories,
+                    protein: food.protein,
+                    carbs: food.carbs,
+                    fat: food.fat,
+                  });
+                }}
+                placeholder="مثلاً: مرغ، برنج، سیب..."
               />
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                💡 یه غذا رو از لیست انتخاب کن تا اطلاعاتش خودکار پر شه
+              </p>
             </div>
 
             {/* Meal Type Buttons */}
@@ -257,9 +271,20 @@ export default function NutritionPage() {
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="flex-1 h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
               >
                 {createMutation.isPending ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setForm({ foodName: '', calories: 0, mealType: 'BREAKFAST' });
+                  setError('');
+                }}
+                className="px-6 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
+              >
+                انصراف
               </button>
             </div>
           </form>
@@ -278,7 +303,6 @@ export default function NutritionPage() {
               className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm animate-fade-in-up card-hover"
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
-              {/* Meal Header */}
               <div
                 className={`bg-gradient-to-l ${meal.color} px-5 py-3 flex items-center justify-between`}
               >
@@ -294,7 +318,6 @@ export default function NutritionPage() {
                 </div>
               </div>
 
-              {/* Meal Items */}
               <div className="p-4">
                 {mealLogs.length === 0 ? (
                   <p className="text-center text-sm text-slate-400 dark:text-slate-500 py-3">
@@ -339,7 +362,7 @@ export default function NutritionPage() {
                               deleteMutation.mutate(log.id);
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 text-sm transition-colors shrink-0 mr-2 hover:scale-110"
+                          className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 text-sm transition-all hover:scale-110 shrink-0 mr-2"
                         >
                           🗑️
                         </button>

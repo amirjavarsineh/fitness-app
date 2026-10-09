@@ -17,6 +17,7 @@ import exerciseRouter from './routes/exercise.routes';
 import reportRouter from './routes/report.routes';
 import exportRouter from './routes/export.routes';
 import achievementsRouter from './routes/achievements.routes';
+import foodRouter from './routes/food.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -25,14 +26,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ===== Security Headers =====
+// Security Headers
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
-// ===== CORS =====
+// CORS
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -40,48 +41,44 @@ app.use(
   })
 );
 
-// ===== Body Parser with limit =====
+// Body Parser with limit
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// ===== Logging =====
+// Logging
 app.use(morgan('dev'));
 
-// ===== Rate Limiting =====
-// محدودیت کلی روی همه API ها
+// Rate Limiting
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقیقه
-  max: 300, // حداکثر 300 درخواست در 15 دقیقه برای هر IP
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: { success: false, message: 'تعداد درخواست‌ها زیاد است. کمی صبر کن.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// محدودیت شدید برای login/register (ضد Brute-Force)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقیقه
-  max: 10, // حداکثر 10 درخواست در 15 دقیقه
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: { success: false, message: 'تعداد تلاش‌های ورود زیاد است. ۱۵ دقیقه صبر کن.' },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true, // درخواست‌های موفق شمرده نشن
+  skipSuccessfulRequests: true,
 });
 
-// محدودیت برای ثبت‌نام
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 ساعت
-  max: 5, // حداکثر 5 ثبت‌نام در 1 ساعت
+  windowMs: 60 * 60 * 1000,
+  max: 5,
   message: { success: false, message: 'تعداد ثبت‌نام‌ها زیاد است. ۱ ساعت صبر کن.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// اعمال محدودیت‌ها
 app.use('/api', generalLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', registerLimiter);
 
-// ===== Routes =====
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/nutrition', nutritionRoutes);
@@ -94,13 +91,14 @@ app.use('/api/exercises', exerciseRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/achievements', achievementsRouter);
+app.use('/api/foods', foodRouter);
 
-// ===== Health check =====
+// Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ===== Error Handler =====
+// Error Handler
 app.use(errorHandler);
 
 app.listen(PORT, () => {
