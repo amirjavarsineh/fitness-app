@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "waterGoal" INTEGER NOT NULL DEFAULT 2000;
