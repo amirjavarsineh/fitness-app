@@ -58,6 +58,13 @@ enum WorkoutType {
   OTHER
 }
 
+enum ChallengeStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id         String   @id @default(cuid())
   email      String   @unique
@@ -77,6 +84,7 @@ model User {
   goals            Goal[]
   bodyMeasurements BodyMeasurement[]
   reminders        Reminder[]
+  challenges       Challenge[]
 }
 
 model Profile {
@@ -286,4 +294,22 @@ model Reminder {
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Challenge {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  emoji        String          @default("🎯")
+  type         String          @default("CUSTOM")
+  targetDays   Int
+  currentDays  Int             @default(0)
+  startDate    DateTime        @default(now())
+  lastCheckIn  DateTime?
+  checkInDates String          @default("")
+  status       ChallengeStatus @default(ACTIVE)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }

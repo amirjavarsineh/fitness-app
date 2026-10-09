@@ -17,6 +17,7 @@ import ExportPage from './pages/ExportPage';
 import AchievementsPage from './pages/AchievementsPage';
 import MeasurementsPage from './pages/MeasurementsPage';
 import RemindersPage from './pages/RemindersPage';
+import ChallengesPage from './pages/ChallengesPage';
 import GoalListPage from './pages/goals/GoalListPage';
 import GoalFormPage from './pages/goals/GoalFormPage';
 
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/measurements" element={<MeasurementsPage />} />
             <Route path="/reminders" element={<RemindersPage />} />
+            <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/export" element={<ExportPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />

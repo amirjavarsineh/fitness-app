@@ -20,6 +20,7 @@ import achievementsRouter from './routes/achievements.routes';
 import foodRouter from './routes/food.routes';
 import measurementRouter from './routes/measurement.routes';
 import reminderRouter from './routes/reminder.routes';
+import challengeRouter from './routes/challenge.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -109,6 +110,7 @@ app.use('/api/achievements', achievementsRouter);
 app.use('/api/foods', foodRouter);
 app.use('/api/measurements', measurementRouter);
 app.use('/api/reminders', reminderRouter);
+app.use('/api/challenges', challengeRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

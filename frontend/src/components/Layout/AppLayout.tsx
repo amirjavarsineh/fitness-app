@@ -10,6 +10,7 @@ const navItems = [
   { to: '/water', label: 'آب', icon: '💧' },
   { to: '/progress', label: 'وزن', icon: '⚖️' },
   { to: '/measurements', label: 'اندازه‌های بدن', icon: '📏' },
+  { to: '/challenges', label: 'چالش‌ها', icon: '🥇' },
   { to: '/reminders', label: 'یادآورها', icon: '🔔' },
   { to: '/report', label: 'گزارش هفتگی', icon: '📉' },
   { to: '/achievements', label: 'مدال‌ها', icon: '🏆' },
