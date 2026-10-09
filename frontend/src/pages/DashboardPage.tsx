@@ -1,5 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import api from '../services/api';
 import { useAuthStore } from '../store/auth.store';
 
@@ -22,11 +34,7 @@ interface StatsResponse {
       today: { calories: number; protein: number; carbs: number; fat: number };
       weekly: { totalCalories: number; dailyAvgCalories: number };
     };
-    water: {
-      today: number;
-      goal: number;
-      percent: number;
-    };
+    water: { today: number; goal: number; percent: number };
     weight: {
       current: number | null;
       start: number | null;
@@ -51,6 +59,12 @@ interface StatsResponse {
       water: { current: number; best: number };
       weight: { current: number; best: number };
     };
+  };
+  charts: {
+    weight: Array<{ date: string; weight: number }>;
+    calories: Array<{ date: string; دریافتی: number; سوزانده: number }>;
+    water: Array<{ date: string; مقدار: number; هدف: number }>;
+    workouts: Array<{ date: string; تعداد: number; دقیقه: number }>;
   };
 }
 
@@ -94,6 +108,7 @@ export default function DashboardPage() {
   }
 
   const stats = data?.stats;
+  const charts = data?.charts;
   const displayName = user?.name ?? 'کاربر';
 
   const hour = new Date().getHours();
@@ -164,7 +179,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ===== Streaks Section ===== */}
+      {/* Streaks */}
       {stats?.streaks && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="animate-fade-in-up delay-1">
@@ -197,9 +212,199 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* =============== Charts =============== */}
+
+      {/* Row 1: Weight + Calories */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weight Chart */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-4 card-hover">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>📈</span> روند وزن (۳۰ روز)
+            </h2>
+            <button
+              onClick={() => navigate('/progress')}
+              className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
+            >
+              مدیریت →
+            </button>
+          </div>
+
+          {!charts?.weight || charts.weight.length < 2 ? (
+            <EmptyChart
+              emoji="⚖️"
+              message="برای دیدن نمودار، حداقل ۲ بار وزن ثبت کن"
+              onClick={() => navigate('/progress')}
+            />
+          ) : (
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer>
+                <LineChart data={charts.weight} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                  <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: 11 }} />
+                  <YAxis
+                    stroke="#94a3b8"
+                    style={{ fontSize: 11 }}
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 8,
+                      fontSize: 13,
+                    }}
+                    formatter={(value) => [`${value} kg`, 'وزن']}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    dot={{ fill: '#10b981', r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Calories Chart */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-5 card-hover">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>🔥</span> کالری (۷ روز)
+            </h2>
+            <button
+              onClick={() => navigate('/nutrition')}
+              className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
+            >
+              مدیریت →
+            </button>
+          </div>
+
+          <div style={{ width: '100%', height: 250 }}>
+            <ResponsiveContainer>
+              <LineChart
+                data={charts?.calories ?? []}
+                margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <YAxis stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line
+                  type="monotone"
+                  dataKey="دریافتی"
+                  stroke="#f59e0b"
+                  strokeWidth={3}
+                  dot={{ fill: '#f59e0b', r: 3 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="سوزانده"
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={{ fill: '#ef4444', r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 2: Water + Workouts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Water Chart */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-6 card-hover">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>💧</span> مصرف آب (۷ روز)
+            </h2>
+            <button
+              onClick={() => navigate('/water')}
+              className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
+            >
+              مدیریت →
+            </button>
+          </div>
+
+          <div style={{ width: '100%', height: 250 }}>
+            <ResponsiveContainer>
+              <BarChart
+                data={charts?.water ?? []}
+                margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <YAxis stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                  formatter={(value) => [`${value} ml`]}
+                />
+                <Bar dataKey="مقدار" fill="#06b6d4" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="هدف" fill="#cbd5e1" radius={[8, 8, 0, 0]} opacity={0.3} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Workouts Chart */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-7 card-hover">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>🏋️</span> تمرینات (۷ روز)
+            </h2>
+            <button
+              onClick={() => navigate('/workouts')}
+              className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium"
+            >
+              مدیریت →
+            </button>
+          </div>
+
+          <div style={{ width: '100%', height: 250 }}>
+            <ResponsiveContainer>
+              <BarChart
+                data={charts?.workouts ?? []}
+                margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <YAxis stroke="#94a3b8" style={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="دقیقه" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       {/* Water Progress Bar */}
       {stats && stats.water.goal > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-5">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-8">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span>💧</span> مصرف آب امروز
@@ -240,9 +445,10 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Recent Workouts + Active Goals */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Workouts */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-6 card-hover">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-8 card-hover">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span>🏋️</span> تمرینات اخیر
@@ -306,7 +512,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Active Goals */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-7 card-hover">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-8 card-hover">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span>🎯</span> اهداف فعال
@@ -552,6 +758,29 @@ function NutritionCard({
         {value}
         <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">{unit}</span>
       </p>
+    </div>
+  );
+}
+
+function EmptyChart({
+  emoji,
+  message,
+  onClick,
+}: {
+  emoji: string;
+  message: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center h-[250px] text-center">
+      <div className="text-4xl mb-2 opacity-50">{emoji}</div>
+      <p className="text-sm text-slate-400 dark:text-slate-500 mb-3 px-4">{message}</p>
+      <button
+        onClick={onClick}
+        className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium transition-colors"
+      >
+        ثبت داده
+      </button>
     </div>
   );
 }
