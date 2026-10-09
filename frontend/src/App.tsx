@@ -13,6 +13,7 @@ import ProgressPage from './pages/ProgressPage';
 import ReportPage from './pages/ReportPage';
 import ExportPage from './pages/ExportPage';
 import AchievementsPage from './pages/AchievementsPage';
+import MeasurementsPage from './pages/MeasurementsPage';
 import GoalListPage from './pages/goals/GoalListPage';
 import GoalFormPage from './pages/goals/GoalFormPage';
 
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/nutrition" element={<NutritionPage />} />
             <Route path="/water" element={<WaterPage />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/measurements" element={<MeasurementsPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/export" element={<ExportPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />

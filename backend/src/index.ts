@@ -18,6 +18,7 @@ import reportRouter from './routes/report.routes';
 import exportRouter from './routes/export.routes';
 import achievementsRouter from './routes/achievements.routes';
 import foodRouter from './routes/food.routes';
+import measurementRouter from './routes/measurement.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -92,6 +93,7 @@ app.use('/api/report', reportRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/foods', foodRouter);
+app.use('/api/measurements', measurementRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
