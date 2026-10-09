@@ -507,7 +507,6 @@ App runs at `http://localhost:5173`.
 ⭐ **If you like this project, give it a star!**
 ⭐ **اگه این پروژه رو دوست داشتی، یه ستاره بده!**
 
-Made with ❤️ for fitness enthusiasts
-ساخته شده با ❤️ برای علاقه‌مندان به تناسب اندام
+
 
 </div>
