@@ -34,10 +34,24 @@ app.use(
   })
 );
 
-// CORS
+// CORS - اجازه به چند دامنه
+const allowedOrigins = [
+  'http://localhost:5173', // Dev
+  'http://localhost:4173', // Preview (PWA)
+  process.env.FRONTEND_URL, // Production (اگه تنظیم شده)
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // اجازه بده اگه origin نبود (Postman, curl) یا توی لیست بود
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`🚫 CORS blocked: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
