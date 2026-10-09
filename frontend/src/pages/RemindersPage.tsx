@@ -5,32 +5,40 @@ import {
   type ReminderType,
   type Reminder,
 } from '../services/reminder.service';
+import { useTranslation } from '../i18n/useTranslation';
 
-const TYPE_INFO: Record<ReminderType, { label: string; emoji: string; color: string }> = {
-  WATER: { label: 'آب', emoji: '💧', color: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300' },
-  WORKOUT: { label: 'تمرین', emoji: '💪', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' },
-  WEIGHT: { label: 'وزن', emoji: '⚖️', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' },
-  MEAL: { label: 'غذا', emoji: '🍎', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' },
-  CUSTOM: { label: 'دلخواه', emoji: '⭐', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
+const TYPE_INFO: Record<ReminderType, { labelKey: string; emoji: string; color: string }> = {
+  WATER: { labelKey: 'reminders.typeWater', emoji: '💧', color: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300' },
+  WORKOUT: { labelKey: 'reminders.typeWorkout', emoji: '💪', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' },
+  WEIGHT: { labelKey: 'reminders.typeWeight', emoji: '⚖️', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' },
+  MEAL: { labelKey: 'reminders.typeMeal', emoji: '🍎', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' },
+  CUSTOM: { labelKey: 'reminders.typeCustom', emoji: '⭐', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
 };
 
-const PRESETS: { title: string; message: string; type: ReminderType; time: string; days: string }[] = [
-  { title: 'نوشیدن آب', message: 'وقتشه یه لیوان آب بخوری 💧', type: 'WATER', time: '10:00', days: 'ALL' },
-  { title: 'تمرین صبحگاهی', message: 'بریم برای تمرین! 💪', type: 'WORKOUT', time: '07:00', days: 'WEEKDAYS' },
-  { title: 'ثبت وزن', message: 'وزنت رو امروز ثبت کن ⚖️', type: 'WEIGHT', time: '08:00', days: 'ALL' },
-  { title: 'یادآور ناهار', message: 'وقت ناهاره! 🍽️', type: 'MEAL', time: '13:00', days: 'ALL' },
-  { title: 'پیاده‌روی شبانه', message: 'یه پیاده‌روی سبک بعد از شام 🚶', type: 'CUSTOM', time: '21:00', days: 'ALL' },
-  { title: 'خواب کافی', message: 'وقتشه بخوابی! 😴', type: 'CUSTOM', time: '23:00', days: 'ALL' },
+const PRESETS: {
+  titleKey: string;
+  messageKey: string;
+  type: ReminderType;
+  time: string;
+  days: string;
+}[] = [
+  { titleKey: 'reminders.presetWater', messageKey: 'reminders.presetWaterMsg', type: 'WATER', time: '10:00', days: 'ALL' },
+  { titleKey: 'reminders.presetWorkout', messageKey: 'reminders.presetWorkoutMsg', type: 'WORKOUT', time: '07:00', days: 'WEEKDAYS' },
+  { titleKey: 'reminders.presetWeight', messageKey: 'reminders.presetWeightMsg', type: 'WEIGHT', time: '08:00', days: 'ALL' },
+  { titleKey: 'reminders.presetLunch', messageKey: 'reminders.presetLunchMsg', type: 'MEAL', time: '13:00', days: 'ALL' },
+  { titleKey: 'reminders.presetWalk', messageKey: 'reminders.presetWalkMsg', type: 'CUSTOM', time: '21:00', days: 'ALL' },
+  { titleKey: 'reminders.presetSleep', messageKey: 'reminders.presetSleepMsg', type: 'CUSTOM', time: '23:00', days: 'ALL' },
 ];
 
-const DAYS_OPTIONS: { value: string; label: string }[] = [
-  { value: 'ALL', label: 'هر روز' },
-  { value: 'WEEKDAYS', label: 'شنبه تا چهارشنبه' },
-  { value: 'WEEKENDS', label: 'پنجشنبه و جمعه' },
+const DAYS_OPTIONS: { value: string; labelKey: string }[] = [
+  { value: 'ALL', labelKey: 'reminders.everyDay' },
+  { value: 'WEEKDAYS', labelKey: 'reminders.weekdays' },
+  { value: 'WEEKENDS', labelKey: 'reminders.weekends' },
 ];
 
 export default function RemindersPage() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -53,7 +61,7 @@ export default function RemindersPage() {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       resetForm();
     },
-    onError: () => setError('خطا در ذخیره‌سازی'),
+    onError: () => setError(t('reminders.saveError')),
   });
 
   const updateMutation = useMutation({
@@ -63,7 +71,7 @@ export default function RemindersPage() {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
       resetForm();
     },
-    onError: () => setError('خطا در ویرایش'),
+    onError: () => setError(t('reminders.editError')),
   });
 
   const toggleMutation = useMutation({
@@ -92,12 +100,11 @@ export default function RemindersPage() {
     setError('');
 
     if (!form.title.trim()) {
-      setError('عنوان الزامی است');
+      setError(t('reminders.titleRequired'));
       return;
     }
-
     if (!/^\d{2}:\d{2}$/.test(form.time)) {
-      setError('ساعت باید به فرمت HH:MM باشه');
+      setError(t('reminders.timeInvalid'));
       return;
     }
 
@@ -130,8 +137,8 @@ export default function RemindersPage() {
 
   const handleUsePreset = (preset: typeof PRESETS[0]) => {
     createMutation.mutate({
-      title: preset.title,
-      message: preset.message,
+      title: t(preset.titleKey as never),
+      message: t(preset.messageKey as never),
       type: preset.type,
       time: preset.time,
       days: preset.days,
@@ -143,7 +150,7 @@ export default function RemindersPage() {
     return (
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-          یادآورها 🔔
+          {t('reminders.title')} 🔔
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -166,9 +173,11 @@ export default function RemindersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">یادآورها 🔔</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('reminders.title')} 🔔
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {list.length} یادآور • {enabledCount} فعال
+            {list.length} {t('reminders.count')} • {enabledCount} {t('reminders.activeCount')}
           </p>
         </div>
         <button
@@ -183,7 +192,7 @@ export default function RemindersPage() {
           }`}
         >
           <span className="text-lg">{showForm ? '✕' : '+'}</span>
-          <span>{showForm ? 'بستن' : 'یادآور جدید'}</span>
+          <span>{showForm ? t('reminders.close') : t('reminders.newReminder')}</span>
         </button>
       </div>
 
@@ -191,7 +200,7 @@ export default function RemindersPage() {
       {showForm && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-6 animate-scale-in">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-            {editingId ? '✏️ ویرایش یادآور' : '➕ یادآور جدید'}
+            {editingId ? '✏️ ' + t('reminders.formEditTitle') : '➕ ' + t('reminders.formTitle')}
           </h2>
 
           {error && (
@@ -202,38 +211,35 @@ export default function RemindersPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Title */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                عنوان *
+                {t('reminders.titleLabel')} *
               </label>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="مثلاً: نوشیدن آب"
+                placeholder={t('reminders.titlePlaceholder')}
                 className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
-            {/* Message */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                پیام (اختیاری)
+                {t('reminders.messageLabel')}
               </label>
               <input
                 type="text"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
-                placeholder="متن اعلان..."
+                placeholder={t('reminders.messagePlaceholder')}
                 className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
-            {/* Type */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                نوع یادآور
+                {t('reminders.typeLabel')}
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {(Object.keys(TYPE_INFO) as ReminderType[]).map((type) => {
@@ -250,18 +256,17 @@ export default function RemindersPage() {
                       }`}
                     >
                       <span className="text-xl">{info.emoji}</span>
-                      <span className="text-xs font-medium">{info.label}</span>
+                      <span className="text-xs font-medium">{t(info.labelKey as never)}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Time & Days */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  ساعت *
+                  {t('reminders.timeLabel')} *
                 </label>
                 <input
                   type="time"
@@ -273,7 +278,7 @@ export default function RemindersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  روزها
+                  {t('reminders.daysLabel')}
                 </label>
                 <select
                   value={form.days}
@@ -282,14 +287,13 @@ export default function RemindersPage() {
                 >
                   {DAYS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(opt.labelKey as never)}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
@@ -297,17 +301,17 @@ export default function RemindersPage() {
                 className="flex-1 h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
               >
                 {createMutation.isPending || updateMutation.isPending
-                  ? 'در حال ذخیره...'
+                  ? t('common.saving')
                   : editingId
-                  ? 'ذخیره تغییرات'
-                  : 'ساخت یادآور'}
+                  ? t('reminders.saveChanges')
+                  : t('reminders.saveReminder')}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
                 className="px-6 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
               >
-                انصراف
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -319,16 +323,16 @@ export default function RemindersPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-12 text-center animate-scale-in">
           <div className="text-6xl mb-4 animate-float">🔔</div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-            هنوز یادآوری نداری
+            {t('reminders.noReminders')}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            با ساخت یادآور، کارهای روزانه‌ت رو فراموش نکن
+            {t('reminders.noRemindersDesc')}
           </p>
           <button
             onClick={() => setShowForm(true)}
             className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-all hover:scale-105"
           >
-            شروع کن
+            {t('reminders.createReminder')}
           </button>
         </div>
       ) : (
@@ -336,6 +340,7 @@ export default function RemindersPage() {
           <div className="space-y-3">
             {list.map((reminder, index) => {
               const info = TYPE_INFO[reminder.type];
+              const daysOption = DAYS_OPTIONS.find((d) => d.value === reminder.days);
               return (
                 <div
                   key={reminder.id}
@@ -359,7 +364,7 @@ export default function RemindersPage() {
                           </h3>
                           {!reminder.enabled && (
                             <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                              غیرفعال
+                              {t('reminders.inactive')}
                             </span>
                           )}
                         </div>
@@ -379,17 +384,13 @@ export default function RemindersPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <span>📅</span>
-                            <span>
-                              {DAYS_OPTIONS.find((d) => d.value === reminder.days)?.label ??
-                                reminder.days}
-                            </span>
+                            <span>{daysOption ? t(daysOption.labelKey as never) : reminder.days}</span>
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2 shrink-0">
-                      {/* Toggle */}
                       <button
                         onClick={() => toggleMutation.mutate(reminder.id)}
                         disabled={toggleMutation.isPending}
@@ -398,7 +399,7 @@ export default function RemindersPage() {
                             ? 'bg-emerald-500'
                             : 'bg-slate-300 dark:bg-slate-700'
                         }`}
-                        aria-label={reminder.enabled ? 'غیرفعال کن' : 'فعال کن'}
+                        aria-label={reminder.enabled ? 'Disable' : 'Enable'}
                       >
                         <span
                           className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
@@ -407,24 +408,23 @@ export default function RemindersPage() {
                         />
                       </button>
 
-                      {/* Edit + Delete */}
                       <div className="flex gap-1">
                         <button
                           onClick={() => handleEdit(reminder)}
                           className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs transition-all hover:scale-110"
-                          title="ویرایش"
+                          title={t('reminders.edit')}
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm('این یادآور حذف بشه؟')) {
+                            if (confirm(t('reminders.deleteConfirm'))) {
                               deleteMutation.mutate(reminder.id);
                             }
                           }}
                           disabled={deleteMutation.isPending}
                           className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 text-xs transition-all hover:scale-110 disabled:opacity-50"
-                          title="حذف"
+                          title={t('reminders.delete')}
                         >
                           🗑️
                         </button>
@@ -439,35 +439,34 @@ export default function RemindersPage() {
           {/* Presets */}
           <div className="mt-8 animate-fade-in-up">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <span>⚡</span> یادآورهای آماده
+              <span>⚡</span> {t('reminders.presets')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-              با یه کلیک اضافه کن
+              {t('reminders.presetsDesc')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {PRESETS.map((preset, i) => {
                 const info = TYPE_INFO[preset.type];
+                const dayOption = DAYS_OPTIONS.find((d) => d.value === preset.days);
                 return (
                   <button
                     key={i}
                     onClick={() => handleUsePreset(preset)}
                     disabled={createMutation.isPending}
-                    className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all text-right hover:scale-[1.02] disabled:opacity-50 flex items-center gap-3"
+                    className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all text-start hover:scale-[1.02] disabled:opacity-50 flex items-center gap-3"
                   >
                     <span className="text-2xl">{info.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-slate-900 dark:text-white">
-                        {preset.title}
+                        {t(preset.titleKey as never)}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
                         <span>🕐 {preset.time}</span>
                         <span>•</span>
-                        <span>
-                          {DAYS_OPTIONS.find((d) => d.value === preset.days)?.label}
-                        </span>
+                        <span>{dayOption ? t(dayOption.labelKey as never) : preset.days}</span>
                       </p>
                     </div>
-                    <span className="text-emerald-500 text-lg">+</span>
+                    <span className="text-emerald-500 text-lg shrink-0">+</span>
                   </button>
                 );
               })}

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { toTehranDateKey, startOfDayTehran } from '../lib/dates';
 
 export const getWeightLogs = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -32,8 +33,10 @@ export const upsertWeightLog = async (req: AuthRequest, res: Response): Promise<
       return;
     }
 
-    const dateObj = date ? new Date(date) : new Date();
-    dateObj.setHours(0, 0, 0, 0);
+    const dateKey = date
+      ? toTehranDateKey(new Date(date))
+      : toTehranDateKey(new Date());
+    const dateObj = startOfDayTehran(dateKey);
 
     const log = await prisma.weightLog.upsert({
       where: {

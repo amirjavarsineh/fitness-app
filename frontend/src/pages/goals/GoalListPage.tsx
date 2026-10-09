@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { goalService, type Goal, type GoalStatus } from '../../services/goal.service';
+import { useTranslation } from '../../i18n/useTranslation';
 
-const GOAL_CATEGORY_INFO: Record<string, { label: string; emoji: string; color: string }> = {
-  WEIGHT: { label: 'وزن', emoji: '⚖️', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' },
-  WORKOUT_FREQUENCY: { label: 'تعداد تمرین', emoji: '🏋️', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' },
-  CALORIE_INTAKE: { label: 'کالری دریافتی', emoji: '🔥', color: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' },
-  MUSCLE_GAIN: { label: 'عضله‌سازی', emoji: '💪', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' },
-  ENDURANCE: { label: 'استقامت', emoji: '🏃', color: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' },
-  OTHER: { label: 'سایر', emoji: '⭐', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
+const GOAL_CATEGORY_INFO: Record<string, { labelKey: string; emoji: string; color: string }> = {
+  WEIGHT: { labelKey: 'goals.categoryWeight', emoji: '⚖️', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' },
+  WORKOUT_FREQUENCY: { labelKey: 'goals.categoryWorkoutFrequency', emoji: '🏋️', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' },
+  CALORIE_INTAKE: { labelKey: 'goals.categoryCalorieIntake', emoji: '🔥', color: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' },
+  MUSCLE_GAIN: { labelKey: 'goals.categoryMuscleGain', emoji: '💪', color: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' },
+  ENDURANCE: { labelKey: 'goals.categoryEndurance', emoji: '🏃', color: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' },
+  OTHER: { labelKey: 'goals.categoryOther', emoji: '⭐', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
 };
 
-const STATUS_INFO: Record<GoalStatus, { label: string; color: string; dot: string }> = {
-  ACTIVE: { label: 'فعال', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' },
-  COMPLETED: { label: 'تکمیل‌شده', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
-  CANCELLED: { label: 'لغو‌شده', color: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400', dot: 'bg-slate-400' },
+const STATUS_INFO: Record<GoalStatus, { labelKey: string; color: string; dot: string }> = {
+  ACTIVE: { labelKey: 'goals.statusActive', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' },
+  COMPLETED: { labelKey: 'goals.statusCompleted', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
+  CANCELLED: { labelKey: 'goals.statusCancelled', color: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400', dot: 'bg-slate-400' },
 };
 
 export default function GoalListPage() {
   const navigate = useNavigate();
+  const { t, language } = useTranslation();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ export default function GoalListPage() {
       const data = await goalService.getAll();
       setGoals(data);
     } catch {
-      setError('دریافت اهداف با خطا مواجه شد');
+      setError(t('goals.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -36,15 +38,16 @@ export default function GoalListPage() {
 
   useEffect(() => {
     fetchGoals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('آیا از حذف این هدف مطمئنی؟')) return;
+    if (!confirm(t('goals.deleteConfirm'))) return;
     try {
       await goalService.remove(id);
       setGoals((prev) => prev.filter((g) => g.id !== id));
     } catch {
-      alert('حذف با خطا مواجه شد');
+      alert(t('goals.errorDelete'));
     }
   };
 
@@ -53,7 +56,7 @@ export default function GoalListPage() {
       const updated = await goalService.update(goal.id, { status });
       setGoals((prev) => prev.map((g) => (g.id === goal.id ? updated : g)));
     } catch {
-      alert('تغییر وضعیت با خطا مواجه شد');
+      alert(t('goals.errorStatus'));
     }
   };
 
@@ -62,10 +65,14 @@ export default function GoalListPage() {
     return Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
   };
 
+  const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">اهداف من</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+          {t('goals.title')}
+        </h1>
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
@@ -94,9 +101,11 @@ export default function GoalListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">اهداف من</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('goals.title')}
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {goals.length} هدف ثبت شده
+            {goals.length} {t('goals.count')}
           </p>
         </div>
         <button
@@ -104,7 +113,7 @@ export default function GoalListPage() {
           className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all hover:scale-105"
         >
           <span className="text-lg">+</span>
-          <span>هدف جدید</span>
+          <span>{t('goals.newGoal')}</span>
         </button>
       </div>
 
@@ -113,16 +122,16 @@ export default function GoalListPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-12 text-center animate-scale-in">
           <div className="text-6xl mb-4 animate-float">🎯</div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-            هنوز هدفی ثبت نکردی
+            {t('goals.noGoals')}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            با تعیین هدف، مسیر پیشرفتت رو مشخص کن
+            {t('goals.noGoalsDesc')}
           </p>
           <button
             onClick={() => navigate('/goals/new')}
             className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-all hover:scale-105"
           >
-            شروع کن
+            {t('goals.start')}
           </button>
         </div>
       ) : (
@@ -139,7 +148,6 @@ export default function GoalListPage() {
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all animate-fade-in-up card-hover"
                 style={{ animationDelay: `${Math.min(index * 0.06, 0.5)}s` }}
               >
-                {/* Header */}
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -147,13 +155,13 @@ export default function GoalListPage() {
                         className={`px-2.5 py-1 rounded-lg text-xs font-medium ${categoryInfo.color} flex items-center gap-1 transition-transform hover:scale-105`}
                       >
                         <span>{categoryInfo.emoji}</span>
-                        <span>{categoryInfo.label}</span>
+                        <span>{t(categoryInfo.labelKey as never)}</span>
                       </span>
                       <span
                         className={`px-2.5 py-1 rounded-lg text-xs font-medium ${statusInfo.color} flex items-center gap-1.5`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} animate-pulse-soft`} />
-                        <span>{statusInfo.label}</span>
+                        <span>{t(statusInfo.labelKey as never)}</span>
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
@@ -166,13 +174,12 @@ export default function GoalListPage() {
                     )}
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => navigate(`/goals/${goal.id}/edit`)}
                       className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium transition-colors"
                     >
-                      ویرایش
+                      {t('goals.edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(goal.id)}
@@ -183,10 +190,11 @@ export default function GoalListPage() {
                   </div>
                 </div>
 
-                {/* Progress */}
                 <div className="mb-3">
                   <div className="flex items-center justify-between mb-2 text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">پیشرفت</span>
+                    <span className="text-slate-500 dark:text-slate-400">
+                      {t('goals.progress')}
+                    </span>
                     <span className="font-medium text-slate-900 dark:text-white">
                       {goal.currentValue} / {goal.targetValue}
                       <span className="text-xs text-slate-400 dark:text-slate-500 mr-2">
@@ -202,14 +210,13 @@ export default function GoalListPage() {
                   </div>
                 </div>
 
-                {/* Footer */}
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
                   <div className="text-xs text-slate-500 dark:text-slate-400">
                     {goal.deadline && (
                       <span className="flex items-center gap-1">
                         <span>📅</span>
                         <span>
-                          مهلت: {new Date(goal.deadline).toLocaleDateString('fa-IR')}
+                          {t('goals.deadline')}: {new Date(goal.deadline).toLocaleDateString(locale)}
                         </span>
                       </span>
                     )}
@@ -221,13 +228,13 @@ export default function GoalListPage() {
                         onClick={() => handleStatusChange(goal, 'COMPLETED')}
                         className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium transition-all hover:scale-105"
                       >
-                        ✓ تکمیل شد
+                        {t('goals.completeBtn')}
                       </button>
                       <button
                         onClick={() => handleStatusChange(goal, 'CANCELLED')}
                         className="px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium transition-all hover:scale-105"
                       >
-                        لغو کردن
+                        {t('goals.cancelBtn')}
                       </button>
                     </div>
                   )}

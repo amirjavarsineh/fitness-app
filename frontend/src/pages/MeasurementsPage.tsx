@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { measurementService } from '../services/measurement.service';
+import { useTranslation } from '../i18n/useTranslation';
 
-const FIELDS: { key: string; label: string; emoji: string; color: string }[] = [
-  { key: 'neck', label: 'گردن', emoji: '🧣', color: 'text-purple-600 dark:text-purple-400' },
-  { key: 'chest', label: 'سینه', emoji: '🫁', color: 'text-blue-600 dark:text-blue-400' },
-  { key: 'waist', label: 'کمر', emoji: '📏', color: 'text-orange-600 dark:text-orange-400' },
-  { key: 'hips', label: 'باسن', emoji: '🍑', color: 'text-pink-600 dark:text-pink-400' },
-  { key: 'bicep', label: 'بازو', emoji: '💪', color: 'text-red-600 dark:text-red-400' },
-  { key: 'forearm', label: 'ساعد', emoji: '🦾', color: 'text-yellow-600 dark:text-yellow-400' },
-  { key: 'thigh', label: 'ران', emoji: '🦵', color: 'text-emerald-600 dark:text-emerald-400' },
-  { key: 'calf', label: 'ساق', emoji: '🦶', color: 'text-cyan-600 dark:text-cyan-400' },
+const FIELDS: { key: string; labelKey: string; emoji: string; color: string }[] = [
+  { key: 'neck', labelKey: 'measurements.neck', emoji: '🧣', color: 'text-purple-600 dark:text-purple-400' },
+  { key: 'chest', labelKey: 'measurements.chest', emoji: '🫁', color: 'text-blue-600 dark:text-blue-400' },
+  { key: 'waist', labelKey: 'measurements.waist', emoji: '📏', color: 'text-orange-600 dark:text-orange-400' },
+  { key: 'hips', labelKey: 'measurements.hips', emoji: '🍑', color: 'text-pink-600 dark:text-pink-400' },
+  { key: 'bicep', labelKey: 'measurements.bicep', emoji: '💪', color: 'text-red-600 dark:text-red-400' },
+  { key: 'forearm', labelKey: 'measurements.forearm', emoji: '🦾', color: 'text-yellow-600 dark:text-yellow-400' },
+  { key: 'thigh', labelKey: 'measurements.thigh', emoji: '🦵', color: 'text-emerald-600 dark:text-emerald-400' },
+  { key: 'calf', labelKey: 'measurements.calf', emoji: '🦶', color: 'text-cyan-600 dark:text-cyan-400' },
 ];
 
 export default function MeasurementsPage() {
   const queryClient = useQueryClient();
+  const { t, language } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState<Record<string, string>>({
@@ -46,7 +48,7 @@ export default function MeasurementsPage() {
       setShowForm(false);
       setError('');
     },
-    onError: () => setError('خطا در ذخیره‌سازی'),
+    onError: () => setError(t('measurements.saveError')),
   });
 
   const deleteMutation = useMutation({
@@ -78,17 +80,21 @@ export default function MeasurementsPage() {
     }
 
     if (!hasAny) {
-      setError('حداقل یکی از اندازه‌ها رو وارد کن');
+      setError(t('measurements.atLeastOne'));
       return;
     }
 
     upsertMutation.mutate(payload as never);
   };
 
+  const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">اندازه‌های بدن</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+          {t('measurements.title')}
+        </h1>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse-soft h-80" />
       </div>
     );
@@ -101,9 +107,11 @@ export default function MeasurementsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">اندازه‌های بدن 📏</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('measurements.title')} 📏
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {stats?.count ?? 0} ثبت اندازه
+            {stats?.count ?? 0} {t('measurements.count')}
           </p>
         </div>
         <button
@@ -115,7 +123,7 @@ export default function MeasurementsPage() {
           }`}
         >
           <span className="text-lg">{showForm ? '✕' : '+'}</span>
-          <span>{showForm ? 'بستن' : 'ثبت اندازه'}</span>
+          <span>{showForm ? t('measurements.close') : t('measurements.logMeasurement')}</span>
         </button>
       </div>
 
@@ -134,11 +142,15 @@ export default function MeasurementsPage() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">{field.emoji}</span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t(field.labelKey as never)}
+                  </p>
                 </div>
                 <p className={`text-2xl font-bold ${field.color}`}>
                   {value}
-                  <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">cm</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">
+                    {t('measurements.cm')}
+                  </span>
                 </p>
                 {change !== null && change !== 0 && (
                   <p
@@ -149,7 +161,7 @@ export default function MeasurementsPage() {
                     }`}
                   >
                     {change > 0 ? '+' : ''}
-                    {change} cm
+                    {change} {t('measurements.cm')}
                   </p>
                 )}
               </div>
@@ -162,7 +174,7 @@ export default function MeasurementsPage() {
       {showForm && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-6 animate-scale-in">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-            ثبت اندازه‌های جدید
+            {t('measurements.newMeasurementTitle')}
           </h2>
 
           {error && (
@@ -174,14 +186,14 @@ export default function MeasurementsPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              💡 همه فیلدها اختیاری هستن. فقط چیزهایی که می‌دونی رو پر کن.
+              {t('measurements.hint')}
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {FIELDS.map((field) => (
                 <div key={field.key}>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    {field.emoji} {field.label} (cm)
+                    {field.emoji} {t(field.labelKey as never)} ({t('measurements.cm')})
                   </label>
                   <input
                     type="number"
@@ -198,13 +210,13 @@ export default function MeasurementsPage() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                یادداشت (اختیاری)
+                {t('measurements.noteLabel')}
               </label>
               <input
                 type="text"
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
-                placeholder="مثلاً بعد از یک ماه تمرین"
+                placeholder={t('measurements.notePlaceholder')}
                 className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
@@ -214,7 +226,7 @@ export default function MeasurementsPage() {
               disabled={upsertMutation.isPending}
               className="w-full h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
             >
-              {upsertMutation.isPending ? 'در حال ذخیره...' : 'ذخیره'}
+              {upsertMutation.isPending ? t('common.saving') : t('common.save')}
             </button>
           </form>
         </div>
@@ -225,22 +237,22 @@ export default function MeasurementsPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-12 text-center animate-scale-in">
           <div className="text-6xl mb-4 animate-float">📏</div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-            هنوز اندازه‌ای ثبت نکردی
+            {t('measurements.noMeasurement')}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            با ثبت اندازه‌های بدن (گردن، سینه، کمر، باسن، بازو و...)، تغییرات رو دنبال کن
+            {t('measurements.noMeasurementDesc')}
           </p>
           <button
             onClick={() => setShowForm(true)}
             className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-all hover:scale-105"
           >
-            شروع کن
+            {t('measurements.start')}
           </button>
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-3 card-hover">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>📋</span> تاریخچه
+            <span>📋</span> {t('measurements.history')}
           </h2>
           <div className="space-y-3">
             {[...list].reverse().map((m, i) => (
@@ -251,11 +263,11 @@ export default function MeasurementsPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-slate-900 dark:text-white">
-                    📅 {new Date(m.date).toLocaleDateString('fa-IR')}
+                    📅 {new Date(m.date).toLocaleDateString(locale)}
                   </p>
                   <button
                     onClick={() => {
-                      if (confirm('این ثبت حذف بشه؟')) {
+                      if (confirm(t('measurements.deleteConfirm'))) {
                         deleteMutation.mutate(m.id);
                       }
                     }}
@@ -274,10 +286,14 @@ export default function MeasurementsPage() {
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs"
                       >
                         <span>{field.emoji}</span>
-                        <span className="text-slate-600 dark:text-slate-300">{field.label}:</span>
+                        <span className="text-slate-600 dark:text-slate-300">
+                          {t(field.labelKey as never)}:
+                        </span>
                         <span className={`font-bold ${field.color}`}>
                           {v}
-                          <span className="text-[10px] opacity-70 mr-0.5">cm</span>
+                          <span className="text-[10px] opacity-70 mr-0.5">
+                            {t('measurements.cm')}
+                          </span>
                         </span>
                       </span>
                     );

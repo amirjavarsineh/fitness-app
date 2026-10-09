@@ -5,20 +5,22 @@ import {
   type CreateGoalInput,
   type GoalCategory,
 } from '../../services/goal.service';
+import { useTranslation } from '../../i18n/useTranslation';
 
-const GOAL_CATEGORIES: { value: GoalCategory; label: string; emoji: string }[] = [
-  { value: 'WEIGHT', label: 'وزن', emoji: '⚖️' },
-  { value: 'WORKOUT_FREQUENCY', label: 'تعداد تمرین', emoji: '🏋️' },
-  { value: 'CALORIE_INTAKE', label: 'کالری دریافتی', emoji: '🔥' },
-  { value: 'MUSCLE_GAIN', label: 'عضله‌سازی', emoji: '💪' },
-  { value: 'ENDURANCE', label: 'استقامت', emoji: '🏃' },
-  { value: 'OTHER', label: 'سایر', emoji: '⭐' },
+const GOAL_CATEGORIES: { value: GoalCategory; labelKey: string; emoji: string }[] = [
+  { value: 'WEIGHT', labelKey: 'goals.categoryWeight', emoji: '⚖️' },
+  { value: 'WORKOUT_FREQUENCY', labelKey: 'goals.categoryWorkoutFrequency', emoji: '🏋️' },
+  { value: 'CALORIE_INTAKE', labelKey: 'goals.categoryCalorieIntake', emoji: '🔥' },
+  { value: 'MUSCLE_GAIN', labelKey: 'goals.categoryMuscleGain', emoji: '💪' },
+  { value: 'ENDURANCE', labelKey: 'goals.categoryEndurance', emoji: '🏃' },
+  { value: 'OTHER', labelKey: 'goals.categoryOther', emoji: '⭐' },
 ];
 
 export default function GoalFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const { t } = useTranslation();
 
   const [form, setForm] = useState<CreateGoalInput>({
     title: '',
@@ -45,7 +47,8 @@ export default function GoalFormPage() {
           deadline: goal.deadline ? goal.deadline.slice(0, 10) : '',
         });
       })
-      .catch(() => setError('دریافت هدف با خطا مواجه شد'));
+      .catch(() => setError(t('goals.errorLoading')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,11 +56,11 @@ export default function GoalFormPage() {
     setError('');
 
     if (!form.title.trim()) {
-      setError('عنوان الزامی است');
+      setError(t('goals.errorTitle'));
       return;
     }
     if (form.targetValue <= 0) {
-      setError('مقدار هدف باید بزرگ‌تر از صفر باشد');
+      setError(t('goals.errorTarget'));
       return;
     }
 
@@ -79,8 +82,10 @@ export default function GoalFormPage() {
       }
       navigate('/goals');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(msg ?? 'خطایی رخ داد');
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? t('goals.errorGeneric');
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -92,16 +97,16 @@ export default function GoalFormPage() {
       <div className="mb-6 animate-fade-in-up">
         <button
           onClick={() => navigate('/goals')}
-          className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1 transition-all hover:translate-x-[-3px]"
+          className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1 transition-all hover:translate-x-[-3px] rtl:hover:translate-x-[-3px] ltr:hover:translate-x-[3px]"
         >
-          <span>→</span>
-          <span>بازگشت به اهداف</span>
+          <span className="rtl:rotate-0 ltr:rotate-180">→</span>
+          <span>{t('goals.backToGoals')}</span>
         </button>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {isEdit ? 'ویرایش هدف' : 'هدف جدید'}
+          {isEdit ? t('goals.formEditTitle') : t('goals.formTitle')}
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {isEdit ? 'تغییرات رو اعمال کن' : 'یه هدف جدید برای خودت تعیین کن'}
+          {isEdit ? t('goals.formEditDesc') : t('goals.formNewDesc')}
         </p>
       </div>
 
@@ -118,13 +123,13 @@ export default function GoalFormPage() {
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              عنوان هدف *
+              {t('goals.titleLabel')} *
             </label>
             <input
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="مثلاً کاهش ۵ کیلو وزن"
+              placeholder={t('goals.titlePlaceholder')}
               className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
@@ -132,7 +137,7 @@ export default function GoalFormPage() {
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              دسته‌بندی هدف
+              {t('goals.categoryLabel')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {GOAL_CATEGORIES.map((cat) => (
@@ -147,7 +152,7 @@ export default function GoalFormPage() {
                   }`}
                 >
                   <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
+                  <span>{t(cat.labelKey as never)}</span>
                 </button>
               ))}
             </div>
@@ -157,7 +162,7 @@ export default function GoalFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                مقدار هدف *
+                {t('goals.targetValueLabel')} *
               </label>
               <input
                 type="number"
@@ -172,7 +177,7 @@ export default function GoalFormPage() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                مقدار فعلی
+                {t('goals.currentValueLabel')}
               </label>
               <input
                 type="number"
@@ -189,7 +194,7 @@ export default function GoalFormPage() {
           {/* Deadline */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              مهلت (اختیاری)
+              {t('goals.deadlineLabel')}
             </label>
             <input
               type="date"
@@ -202,13 +207,13 @@ export default function GoalFormPage() {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              توضیحات (اختیاری)
+              {t('goals.descriptionLabel')}
             </label>
             <textarea
               rows={3}
               value={form.description ?? ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="توضیحات بیشتر..."
+              placeholder={t('goals.descriptionPlaceholder')}
               className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
             />
           </div>
@@ -220,14 +225,18 @@ export default function GoalFormPage() {
               disabled={loading}
               className="flex-1 h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
             >
-              {loading ? 'در حال ذخیره...' : isEdit ? 'ذخیره تغییرات' : 'ثبت هدف'}
+              {loading
+                ? t('common.saving')
+                : isEdit
+                ? t('goals.saveChanges')
+                : t('goals.saveGoal')}
             </button>
             <button
               type="button"
               onClick={() => navigate('/goals')}
               className="px-6 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
             >
-              انصراف
+              {t('common.cancel')}
             </button>
           </div>
         </form>

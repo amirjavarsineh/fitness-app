@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { exerciseService, type Exercise } from '../services/exercise.service';
+import { useTranslation } from '../i18n/useTranslation';
 
 interface Props {
   value: string;
@@ -17,17 +18,8 @@ const CATEGORY_EMOJI: Record<string, string> = {
   OTHER: '⭐',
 };
 
-const MUSCLE_LABELS: Record<string, string> = {
-  CHEST: 'سینه',
-  BACK: 'پشت',
-  LEGS: 'پا',
-  SHOULDERS: 'سرشانه',
-  ARMS: 'بازو',
-  CORE: 'مرکزی',
-  FULL_BODY: 'کل بدن',
-};
-
 export default function ExercisePicker({ value, onChange, placeholder }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -51,6 +43,12 @@ export default function ExercisePicker({ value, onChange, placeholder }: Props) 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const muscleLabel = (group: string): string => {
+    const key = `muscleGroups.${group}`;
+    const translated = t(key as never);
+    return translated === key ? group : translated;
+  };
 
   const filtered = (exercises ?? []).filter((ex) => {
     const q = search.trim().toLowerCase();
@@ -78,7 +76,7 @@ export default function ExercisePicker({ value, onChange, placeholder }: Props) 
           if (!open) setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder={placeholder ?? 'نام حرکت رو تایپ کن یا از لیست انتخاب کن'}
+        placeholder={placeholder ?? t('exercisePicker.placeholder')}
         className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
       />
 
@@ -87,7 +85,7 @@ export default function ExercisePicker({ value, onChange, placeholder }: Props) 
         <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
           {filtered.length === 0 ? (
             <div className="p-4 text-center text-sm text-slate-400 dark:text-slate-500">
-              تمرینی پیدا نشد
+              {t('exercisePicker.noResults')}
             </div>
           ) : (
             <div className="py-1">
@@ -108,7 +106,7 @@ export default function ExercisePicker({ value, onChange, placeholder }: Props) 
                       </p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 truncate">
                         {ex.name}
-                        {ex.muscleGroup && ` • ${MUSCLE_LABELS[ex.muscleGroup] ?? ex.muscleGroup}`}
+                        {ex.muscleGroup && ` • ${muscleLabel(ex.muscleGroup)}`}
                       </p>
                     </div>
                   </div>

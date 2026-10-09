@@ -1,14 +1,12 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { todayTehran } from '../lib/dates';
 
-// گرفتن لاگ آب امروز + هدف آب کاربر
 export const getTodayWater = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = todayTehran();
 
     const [log, user] = await Promise.all([
       prisma.waterLog.findUnique({
@@ -31,7 +29,6 @@ export const getTodayWater = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-// ثبت یا آپدیت آب امروز
 export const addWater = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -51,8 +48,7 @@ export const addWater = async (req: AuthRequest, res: Response): Promise<void> =
       return;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = todayTehran();
 
     const existing = await prisma.waterLog.findUnique({
       where: { userId_date: { userId, date: today } },
@@ -71,13 +67,10 @@ export const addWater = async (req: AuthRequest, res: Response): Promise<void> =
   }
 };
 
-// ریست کردن آب امروز
 export const resetTodayWater = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = todayTehran();
 
     await prisma.waterLog.deleteMany({
       where: { userId, date: today },
@@ -90,14 +83,11 @@ export const resetTodayWater = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-// آمار هفتگی آب
 export const getWaterStats = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const today = todayTehran();
     const weekStart = new Date(today);
     weekStart.setDate(weekStart.getDate() - 6);
 
@@ -130,7 +120,6 @@ export const getWaterStats = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-// آپدیت هدف آب کاربر
 export const updateWaterGoal = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;

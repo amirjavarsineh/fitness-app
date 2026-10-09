@@ -6,16 +6,18 @@ import {
   type CreateNutritionInput,
 } from '../services/nutrition.service';
 import FoodPicker from '../components/FoodPicker';
+import { useTranslation } from '../i18n/useTranslation';
 
-const MEAL_TYPES: { value: MealType; label: string; emoji: string; color: string }[] = [
-  { value: 'BREAKFAST', label: 'صبحانه', emoji: '🌅', color: 'from-orange-400 to-yellow-400' },
-  { value: 'LUNCH', label: 'ناهار', emoji: '☀️', color: 'from-amber-400 to-orange-400' },
-  { value: 'DINNER', label: 'شام', emoji: '🌙', color: 'from-indigo-400 to-purple-400' },
-  { value: 'SNACK', label: 'میان‌وعده', emoji: '🍎', color: 'from-pink-400 to-red-400' },
+const MEAL_TYPES: { value: MealType; labelKey: string; emoji: string; color: string }[] = [
+  { value: 'BREAKFAST', labelKey: 'nutrition.breakfast', emoji: '🌅', color: 'from-orange-400 to-yellow-400' },
+  { value: 'LUNCH', labelKey: 'nutrition.lunch', emoji: '☀️', color: 'from-amber-400 to-orange-400' },
+  { value: 'DINNER', labelKey: 'nutrition.dinner', emoji: '🌙', color: 'from-indigo-400 to-purple-400' },
+  { value: 'SNACK', labelKey: 'nutrition.snack', emoji: '🍎', color: 'from-pink-400 to-red-400' },
 ];
 
 export default function NutritionPage() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CreateNutritionInput>({
     foodName: '',
@@ -40,7 +42,7 @@ export default function NutritionPage() {
       setShowForm(false);
       setError('');
     },
-    onError: () => setError('خطا در ذخیره‌سازی'),
+    onError: () => setError(t('nutrition.saveError')),
   });
 
   const deleteMutation = useMutation({
@@ -53,11 +55,11 @@ export default function NutritionPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.foodName.trim()) {
-      setError('نام غذا الزامی است');
+      setError(t('nutrition.foodNameRequired'));
       return;
     }
     if (form.calories <= 0) {
-      setError('کالری باید بزرگ‌تر از صفر باشد');
+      setError(t('nutrition.caloriesPositive'));
       return;
     }
     createMutation.mutate({
@@ -73,7 +75,9 @@ export default function NutritionPage() {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">تغذیه امروز</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+          {t('nutrition.title')}
+        </h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -95,9 +99,11 @@ export default function NutritionPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">تغذیه امروز</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('nutrition.title')}
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {logs.length} آیتم ثبت شده
+            {logs.length} {t('nutrition.itemsLogged')}
           </p>
         </div>
         <button
@@ -109,23 +115,23 @@ export default function NutritionPage() {
           }`}
         >
           <span className="text-lg">{showForm ? '✕' : '+'}</span>
-          <span>{showForm ? 'بستن فرم' : 'افزودن غذا'}</span>
+          <span>{showForm ? t('nutrition.closeForm') : t('nutrition.addFood')}</span>
         </button>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="animate-fade-in-up delay-1">
-          <SummaryCard label="کالری" value={totals.calories} unit="kcal" icon="🔥" color="red" />
+          <SummaryCard label={t('nutrition.calories')} value={totals.calories} unit="kcal" icon="🔥" color="red" />
         </div>
         <div className="animate-fade-in-up delay-2">
-          <SummaryCard label="پروتئین" value={totals.protein} unit="g" icon="🥩" color="blue" decimals />
+          <SummaryCard label={t('nutrition.protein')} value={totals.protein} unit="g" icon="🥩" color="blue" decimals />
         </div>
         <div className="animate-fade-in-up delay-3">
-          <SummaryCard label="کربوهیدرات" value={totals.carbs} unit="g" icon="🍞" color="yellow" decimals />
+          <SummaryCard label={t('nutrition.carbs')} value={totals.carbs} unit="g" icon="🍞" color="yellow" decimals />
         </div>
         <div className="animate-fade-in-up delay-4">
-          <SummaryCard label="چربی" value={totals.fat} unit="g" icon="🥑" color="purple" decimals />
+          <SummaryCard label={t('nutrition.fat')} value={totals.fat} unit="g" icon="🥑" color="purple" decimals />
         </div>
       </div>
 
@@ -133,7 +139,7 @@ export default function NutritionPage() {
       {showForm && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-6 animate-scale-in">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>🍽️</span> افزودن غذا
+            <span>🍽️</span> {t('nutrition.addFoodTitle')}
           </h2>
 
           {error && (
@@ -147,7 +153,7 @@ export default function NutritionPage() {
             {/* Food Picker */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                جستجو در کاتالوگ غذاها 🍎
+                {t('nutrition.searchCatalog')}
               </label>
               <FoodPicker
                 value={form.foodName}
@@ -162,17 +168,17 @@ export default function NutritionPage() {
                     fat: food.fat,
                   });
                 }}
-                placeholder="مثلاً: مرغ، برنج، سیب..."
+                placeholder={t('nutrition.searchCatalogPlaceholder')}
               />
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
-                💡 یه غذا رو از لیست انتخاب کن تا اطلاعاتش خودکار پر شه
+                {t('nutrition.searchHint')}
               </p>
             </div>
 
             {/* Meal Type Buttons */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                وعده *
+                {t('nutrition.meal')} *
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {MEAL_TYPES.map((meal) => (
@@ -187,7 +193,7 @@ export default function NutritionPage() {
                     }`}
                   >
                     <span className="text-xl">{meal.emoji}</span>
-                    <span className="text-xs">{meal.label}</span>
+                    <span className="text-xs">{t(meal.labelKey as never)}</span>
                   </button>
                 ))}
               </div>
@@ -197,7 +203,7 @@ export default function NutritionPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  کالری *
+                  {t('nutrition.calories')} *
                 </label>
                 <input
                   type="number"
@@ -210,7 +216,7 @@ export default function NutritionPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  پروتئین (g)
+                  {t('nutrition.protein')} (g)
                 </label>
                 <input
                   type="number"
@@ -229,7 +235,7 @@ export default function NutritionPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  کربوهیدرات (g)
+                  {t('nutrition.carbs')} (g)
                 </label>
                 <input
                   type="number"
@@ -248,7 +254,7 @@ export default function NutritionPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  چربی (g)
+                  {t('nutrition.fat')} (g)
                 </label>
                 <input
                   type="number"
@@ -273,7 +279,7 @@ export default function NutritionPage() {
                 disabled={createMutation.isPending}
                 className="flex-1 h-12 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
               >
-                {createMutation.isPending ? 'در حال ذخیره...' : 'ذخیره'}
+                {createMutation.isPending ? t('common.saving') : t('common.save')}
               </button>
               <button
                 type="button"
@@ -284,7 +290,7 @@ export default function NutritionPage() {
                 }}
                 className="px-6 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
               >
-                انصراف
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -308,9 +314,9 @@ export default function NutritionPage() {
               >
                 <div className="flex items-center gap-2 text-white">
                   <span className="text-xl">{meal.emoji}</span>
-                  <span className="font-semibold">{meal.label}</span>
+                  <span className="font-semibold">{t(meal.labelKey as never)}</span>
                   <span className="text-xs opacity-90">
-                    ({mealLogs.length} آیتم)
+                    ({mealLogs.length} {t('nutrition.itemsCount')})
                   </span>
                 </div>
                 <div className="text-white font-bold">
@@ -321,7 +327,7 @@ export default function NutritionPage() {
               <div className="p-4">
                 {mealLogs.length === 0 ? (
                   <p className="text-center text-sm text-slate-400 dark:text-slate-500 py-3">
-                    چیزی ثبت نشده
+                    {t('nutrition.nothing')}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -337,7 +343,7 @@ export default function NutritionPage() {
                           </p>
                           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
                             <span className="font-semibold text-red-500 dark:text-red-400">
-                              {log.calories} kcal
+                              {log.calories} {t('nutrition.kcal')}
                             </span>
                             {log.protein != null && (
                               <span className="text-blue-500 dark:text-blue-400">
@@ -358,7 +364,7 @@ export default function NutritionPage() {
                         </div>
                         <button
                           onClick={() => {
-                            if (confirm('این آیتم حذف بشه؟')) {
+                            if (confirm(t('nutrition.deleteConfirm'))) {
                               deleteMutation.mutate(log.id);
                             }
                           }}

@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { xpService } from '../services/xp.service';
+import { useTranslation } from '../i18n/useTranslation';
 
 const BREAKDOWN_INFO: {
   key: string;
-  label: string;
+  labelKey: string;
   emoji: string;
   color: string;
   xpKey: string;
@@ -11,7 +12,7 @@ const BREAKDOWN_INFO: {
 }[] = [
   {
     key: 'workouts',
-    label: 'تمرینات',
+    labelKey: 'level.activities.workouts',
     emoji: '🏋️',
     color: 'from-red-400 to-orange-500',
     xpKey: 'WORKOUT',
@@ -19,7 +20,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'nutrition',
-    label: 'تغذیه',
+    labelKey: 'level.activities.nutrition',
     emoji: '🍎',
     color: 'from-emerald-400 to-green-500',
     xpKey: 'NUTRITION',
@@ -27,7 +28,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'water',
-    label: 'آب',
+    labelKey: 'level.activities.water',
     emoji: '💧',
     color: 'from-cyan-400 to-blue-500',
     xpKey: 'WATER_DAY',
@@ -35,7 +36,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'weight',
-    label: 'وزن',
+    labelKey: 'level.activities.weight',
     emoji: '⚖️',
     color: 'from-purple-400 to-pink-500',
     xpKey: 'WEIGHT',
@@ -43,7 +44,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'measurements',
-    label: 'اندازه‌های بدن',
+    labelKey: 'level.activities.measurements',
     emoji: '📏',
     color: 'from-blue-400 to-indigo-500',
     xpKey: 'MEASUREMENT',
@@ -51,7 +52,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'challenges',
-    label: 'چک‌این چالش‌ها',
+    labelKey: 'level.activities.challenges',
     emoji: '🥇',
     color: 'from-yellow-400 to-amber-500',
     xpKey: 'CHALLENGE_CHECKIN',
@@ -59,7 +60,7 @@ const BREAKDOWN_INFO: {
   },
   {
     key: 'goals',
-    label: 'اهداف تکمیل‌شده',
+    labelKey: 'level.activities.goals',
     emoji: '🎯',
     color: 'from-pink-400 to-rose-500',
     xpKey: 'GOAL_COMPLETED',
@@ -67,15 +68,25 @@ const BREAKDOWN_INFO: {
   },
 ];
 
-const LEVEL_REWARDS = [
-  { level: 5, title: 'آماتور', emoji: '🐣', color: 'from-blue-400 to-emerald-500' },
-  { level: 10, title: 'حرفه‌ای', emoji: '🦅', color: 'from-emerald-400 to-cyan-500' },
-  { level: 15, title: 'استاد', emoji: '🏆', color: 'from-purple-400 to-pink-500' },
-  { level: 20, title: 'افسانه', emoji: '💎', color: 'from-cyan-400 to-blue-500' },
-  { level: 30, title: 'ابرقهرمان', emoji: '⚡', color: 'from-yellow-400 to-orange-500' },
+const LEVEL_REWARDS: { level: number; titleKey: string; emoji: string; color: string }[] = [
+  { level: 5, titleKey: 'level.ranks.amateur', emoji: '🐣', color: 'from-blue-400 to-emerald-500' },
+  { level: 10, titleKey: 'level.ranks.pro', emoji: '🦅', color: 'from-emerald-400 to-cyan-500' },
+  { level: 15, titleKey: 'level.ranks.master', emoji: '🏆', color: 'from-purple-400 to-pink-500' },
+  { level: 20, titleKey: 'level.ranks.legend', emoji: '💎', color: 'from-cyan-400 to-blue-500' },
+  { level: 30, titleKey: 'level.ranks.superhero', emoji: '⚡', color: 'from-yellow-400 to-orange-500' },
 ];
 
+function getRankKey(level: number): string {
+  if (level >= 30) return 'level.ranks.superhero';
+  if (level >= 20) return 'level.ranks.legend';
+  if (level >= 15) return 'level.ranks.master';
+  if (level >= 10) return 'level.ranks.pro';
+  if (level >= 5) return 'level.ranks.amateur';
+  return 'level.ranks.beginner';
+}
+
 export default function LevelPage() {
+  const { t } = useTranslation();
   const { data: profile, isLoading } = useQuery({
     queryKey: ['xpProfile'],
     queryFn: xpService.getProfile,
@@ -85,7 +96,7 @@ export default function LevelPage() {
     return (
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-          سطح و امتیاز 💪
+          {t('level.title')} 💪
         </h1>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 animate-pulse-soft h-96" />
       </div>
@@ -96,7 +107,7 @@ export default function LevelPage() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-xl">
-          خطا در بارگذاری اطلاعات
+          {t('common.error')}
         </div>
       </div>
     );
@@ -108,6 +119,7 @@ export default function LevelPage() {
   );
 
   const remainingXp = profile.xpForNextLevel - profile.xpInLevel;
+  const rankTitle = t(getRankKey(profile.level) as never);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -115,29 +127,26 @@ export default function LevelPage() {
       <div
         className={`bg-gradient-to-br ${profile.rank.color} rounded-3xl p-6 md:p-8 text-white shadow-2xl animate-fade-in-up relative overflow-hidden`}
       >
-        {/* Background glow */}
         <div className="absolute inset-0 bg-white/10 pointer-events-none" />
 
         <div className="relative flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-white/80 text-sm mb-1">رتبه‌ی فعلی تو</p>
+            <p className="text-white/80 text-sm mb-1">{t('level.currentRank')}</p>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-5xl md:text-6xl animate-float">
                 {profile.rank.emoji}
               </span>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold">
-                  {profile.rank.title}
-                </h1>
+                <h1 className="text-2xl md:text-3xl font-bold">{rankTitle}</h1>
                 <p className="text-white/80 text-sm mt-0.5">
-                  سطح {profile.level}
+                  {t('level.level')} {profile.level}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="text-left shrink-0">
-            <p className="text-white/80 text-xs mb-1">کل امتیاز</p>
+            <p className="text-white/80 text-xs mb-1">{t('level.totalXp')}</p>
             <p className="text-3xl md:text-4xl font-bold">
               {profile.totalXp.toLocaleString('fa-IR')}
             </p>
@@ -145,7 +154,6 @@ export default function LevelPage() {
           </div>
         </div>
 
-        {/* Progress to next level */}
         <div className="relative mt-6">
           <div className="flex items-center justify-between mb-2 text-sm">
             <span className="text-white/90">
@@ -163,7 +171,7 @@ export default function LevelPage() {
           <p className="text-white/90 text-xs mt-2 flex items-center gap-1">
             <span>🎯</span>
             <span>
-              {remainingXp.toLocaleString('fa-IR')} XP دیگه تا سطح{' '}
+              {remainingXp.toLocaleString('fa-IR')} {t('level.xpToNext')}{' '}
               {profile.level + 1}
             </span>
           </p>
@@ -173,7 +181,7 @@ export default function LevelPage() {
       {/* XP Breakdown */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-1 card-hover">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span>📊</span> امتیازاتت از کجا اومده؟
+          <span>📊</span> {t('level.xpBreakdown')}
         </h2>
 
         <div className="space-y-3">
@@ -197,7 +205,7 @@ export default function LevelPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{item.emoji}</span>
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {item.label}
+                      {t(item.labelKey as never)}
                     </span>
                     <span className="text-xs text-slate-400 dark:text-slate-500">
                       ({count} × {xpPerItem})
@@ -207,9 +215,7 @@ export default function LevelPage() {
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
                       {xpValue.toLocaleString('fa-IR')}
                     </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">
-                      XP
-                    </span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">XP</span>
                   </div>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -223,10 +229,9 @@ export default function LevelPage() {
           })}
         </div>
 
-        {/* Total */}
         <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            مجموع کل
+            {t('level.total')}
           </span>
           <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
             {profile.totalXp.toLocaleString('fa-IR')} XP
@@ -237,10 +242,10 @@ export default function LevelPage() {
       {/* Level Rewards Roadmap */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-2 card-hover">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span>🗺️</span> نقشه‌ی رتبه‌ها
+          <span>🗺️</span> {t('level.rankRoadmap')}
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          با بالا رفتن سطح، رتبه‌ت ارتقا پیدا می‌کنه
+          {t('level.rankRoadmapDesc')}
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -267,7 +272,7 @@ export default function LevelPage() {
                     unlocked ? 'text-white' : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
-                  {reward.title}
+                  {t(reward.titleKey as never)}
                 </p>
                 <p
                   className={`text-[10px] ${
@@ -276,11 +281,11 @@ export default function LevelPage() {
                       : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
-                  سطح {reward.level}
+                  {t('level.level')} {reward.level}
                 </p>
                 {unlocked && (
                   <p className="text-[10px] text-white/90 mt-1 font-medium">
-                    ✓ باز شده
+                    ✓ {t('level.unlocked')}
                   </p>
                 )}
               </div>
@@ -292,7 +297,7 @@ export default function LevelPage() {
       {/* How to gain XP */}
       <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 dark:from-emerald-950/40 dark:to-cyan-950/40 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 p-6 shadow-sm animate-fade-in-up delay-3">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span>💡</span> چطور XP بگیرم؟
+          <span>💡</span> {t('level.howToGain')}
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -304,7 +309,7 @@ export default function LevelPage() {
               <span className="text-2xl">{item.emoji}</span>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
-                  {item.label}
+                  {t(item.labelKey as never)}
                 </p>
                 <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                   +{profile.xpValues[item.xpKey as keyof typeof profile.xpValues]} XP

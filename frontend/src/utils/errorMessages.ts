@@ -1,75 +1,131 @@
-// ترجمه پیام‌های خطای backend به فارسی
+import { useLanguageStore } from '../store/language.store';
 
-const ERROR_MESSAGES: Record<string, string> = {
-  // Auth
-  'Invalid credentials': 'ایمیل یا رمز عبور اشتباه است',
-  'Email already in use': 'این ایمیل قبلاً ثبت شده است',
-  'User not found': 'کاربر پیدا نشد',
-  'No token provided': 'لطفاً وارد حساب خود شوید',
-  'Invalid or expired token': 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید',
+type Lang = 'fa' | 'en';
 
-  // Validation
-  'title, goalType, and targetValue are required': 'عنوان، دسته‌بندی و مقدار هدف الزامی است',
-  'title, goalType, and targetValue are required.': 'عنوان، دسته‌بندی و مقدار هدف الزامی است',
-  'targetValue must be a positive number': 'مقدار هدف باید بزرگ‌تر از صفر باشد',
-  'type and duration are required': 'نوع تمرین و مدت زمان الزامی است',
-  'duration must be a positive number (minutes)': 'مدت زمان باید یه عدد مثبت باشه',
-  'foodName, calories, and mealType are required': 'نام غذا، کالری و وعده الزامی است',
-  'age, weight, height, gender, activityLevel, goal are required': 'سن، وزن، قد، جنسیت، سطح فعالیت و هدف الزامی هستند',
-
-  // Not found
-  'Goal not found': 'هدف پیدا نشد',
-  'Workout not found': 'تمرین پیدا نشد',
-  'Log not found': 'آیتم پیدا نشد',
-
-  // Generic
-  'Server error': 'خطای سرور. لطفاً دوباره تلاش کن',
-  'Failed to fetch goals': 'دریافت اهداف با خطا مواجه شد',
-  'Failed to fetch goal': 'دریافت هدف با خطا مواجه شد',
-  'Failed to create goal': 'ساخت هدف با خطا مواجه شد',
-  'Failed to update goal': 'ویرایش هدف با خطا مواجه شد',
-  'Failed to delete goal': 'حذف هدف با خطا مواجه شد',
+const MESSAGES: Record<string, { fa: string; en: string }> = {
+  'Invalid credentials': {
+    fa: 'ایمیل یا رمز عبور اشتباه است',
+    en: 'Invalid email or password',
+  },
+  'Email already in use': {
+    fa: 'این ایمیل قبلاً ثبت شده است',
+    en: 'This email is already registered',
+  },
+  'User not found': {
+    fa: 'کاربر پیدا نشد',
+    en: 'User not found',
+  },
+  'No token provided': {
+    fa: 'لطفاً وارد حساب خود شوید',
+    en: 'Please log in',
+  },
+  'Invalid or expired token': {
+    fa: 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید',
+    en: 'Session expired. Please log in again',
+  },
+  'title, goalType, and targetValue are required': {
+    fa: 'عنوان، دسته‌بندی و مقدار هدف الزامی است',
+    en: 'Title, category, and target value are required',
+  },
+  'title, goalType, and targetValue are required.': {
+    fa: 'عنوان، دسته‌بندی و مقدار هدف الزامی است',
+    en: 'Title, category, and target value are required',
+  },
+  'targetValue must be a positive number': {
+    fa: 'مقدار هدف باید بزرگ‌تر از صفر باشد',
+    en: 'Target value must be greater than zero',
+  },
+  'type and duration are required': {
+    fa: 'نوع تمرین و مدت زمان الزامی است',
+    en: 'Workout type and duration are required',
+  },
+  'duration must be a positive number (minutes)': {
+    fa: 'مدت زمان باید یه عدد مثبت باشه',
+    en: 'Duration must be a positive number',
+  },
+  'foodName, calories, and mealType are required': {
+    fa: 'نام غذا، کالری و وعده الزامی است',
+    en: 'Food name, calories, and meal type are required',
+  },
+  'age, weight, height, gender, activityLevel, goal are required': {
+    fa: 'سن، وزن، قد، جنسیت، سطح فعالیت و هدف الزامی هستند',
+    en: 'Age, weight, height, gender, activity level, and goal are required',
+  },
+  'Goal not found': {
+    fa: 'هدف پیدا نشد',
+    en: 'Goal not found',
+  },
+  'Workout not found': {
+    fa: 'تمرین پیدا نشد',
+    en: 'Workout not found',
+  },
+  'Log not found': {
+    fa: 'آیتم پیدا نشد',
+    en: 'Log not found',
+  },
+  'Server error': {
+    fa: 'خطای سرور. لطفاً دوباره تلاش کن',
+    en: 'Server error. Please try again',
+  },
+  'Failed to fetch goals': {
+    fa: 'دریافت اهداف با خطا مواجه شد',
+    en: 'Failed to fetch goals',
+  },
+  'Failed to fetch goal': {
+    fa: 'دریافت هدف با خطا مواجه شد',
+    en: 'Failed to fetch goal',
+  },
+  'Failed to create goal': {
+    fa: 'ساخت هدف با خطا مواجه شد',
+    en: 'Failed to create goal',
+  },
+  'Failed to update goal': {
+    fa: 'ویرایش هدف با خطا مواجه شد',
+    en: 'Failed to update goal',
+  },
+  'Failed to delete goal': {
+    fa: 'حذف هدف با خطا مواجه شد',
+    en: 'Failed to delete goal',
+  },
 };
 
-export function getPersianError(message: string | undefined | null): string {
-  if (!message) return 'خطایی رخ داد. لطفاً دوباره تلاش کن';
+const PREFIX_MESSAGES: Array<{ prefix: string; fa: string; en: string }> = [
+  { prefix: 'Invalid type', fa: 'نوع تمرین نامعتبر است', en: 'Invalid workout type' },
+  { prefix: 'Invalid goalType', fa: 'دسته‌بندی هدف نامعتبر است', en: 'Invalid goal category' },
+  { prefix: 'Invalid gender', fa: 'جنسیت نامعتبر است', en: 'Invalid gender' },
+  { prefix: 'Invalid activityLevel', fa: 'سطح فعالیت نامعتبر است', en: 'Invalid activity level' },
+  { prefix: 'Invalid goal', fa: 'هدف نامعتبر است', en: 'Invalid goal' },
+  { prefix: 'Invalid status', fa: 'وضعیت نامعتبر است', en: 'Invalid status' },
+];
 
-  // اگه پیام توی دیکشنری بود، ترجمه کن
-  if (ERROR_MESSAGES[message]) {
-    return ERROR_MESSAGES[message];
+const GENERIC_ERROR: Record<Lang, string> = {
+  fa: 'خطایی رخ داد. لطفاً دوباره تلاش کن',
+  en: 'An error occurred. Please try again',
+};
+
+export function getErrorMessage(
+  message: string | undefined | null,
+  language: Lang = 'fa'
+): string {
+  if (!message) return GENERIC_ERROR[language];
+
+  const exact = MESSAGES[message];
+  if (exact) return exact[language];
+
+  for (const p of PREFIX_MESSAGES) {
+    if (message.startsWith(p.prefix)) return p[language];
   }
 
-  // اگه پیام شامل "Invalid type" بود، یه پیام مناسب بده
-  if (message.startsWith('Invalid type')) {
-    return 'نوع تمرین نامعتبر است';
-  }
-
-  if (message.startsWith('Invalid goalType')) {
-    return 'دسته‌بندی هدف نامعتبر است';
-  }
-
-  if (message.startsWith('Invalid gender')) {
-    return 'جنسیت نامعتبر است';
-  }
-
-  if (message.startsWith('Invalid activityLevel')) {
-    return 'سطح فعالیت نامعتبر است';
-  }
-
-  if (message.startsWith('Invalid goal')) {
-    return 'هدف نامعتبر است';
-  }
-
-  if (message.startsWith('Invalid status')) {
-    return 'وضعیت نامعتبر است';
-  }
-
-  // اگه هیچی مطابقت نکرد، همون پیام انگلیسی رو برگردون
   return message;
 }
 
-// استخراج پیام خطا از پاسخ axios
 export function extractErrorMessage(error: unknown): string {
+  const language = useLanguageStore.getState().language;
   const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
-  return getPersianError(msg);
+  return getErrorMessage(msg, language);
+}
+
+// سازگاری با کدهای قبلی
+export function getPersianError(message: string | undefined | null): string {
+  return getErrorMessage(message, 'fa');
 }

@@ -25,6 +25,7 @@ export interface Workout {
   caloriesBurned: number | null;
   notes: string | null;
   date: string;
+  isTemplate?: boolean;
   exercises: WorkoutExercise[];
   createdAt: string;
   updatedAt: string;
@@ -38,6 +39,7 @@ export interface CreateWorkoutDto {
   caloriesBurned?: number | null;
   notes?: string;
   exercises?: WorkoutExercise[];
+  isTemplate?: boolean;
 }
 
 export interface UpdateWorkoutDto extends CreateWorkoutDto {}
@@ -46,6 +48,20 @@ export const workoutService = {
   getWorkouts: async (): Promise<Workout[]> => {
     const res = await api.get<{ success: boolean; workouts: Workout[] }>('/workouts');
     return res.data.workouts;
+  },
+
+  getTemplates: async (): Promise<Workout[]> => {
+    const res = await api.get<{ success: boolean; templates: Workout[] }>(
+      '/workouts/templates'
+    );
+    return res.data.templates;
+  },
+
+  useTemplate: async (id: string): Promise<Workout> => {
+    const res = await api.post<{ success: boolean; workout: Workout }>(
+      `/workouts/templates/${id}/use`
+    );
+    return res.data.workout;
   },
 
   getWorkout: async (id: string): Promise<Workout> => {

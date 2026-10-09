@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { toTehranDateKey, startOfDayTehran } from '../lib/dates';
 
-// گرفتن همه چالش‌ها
 export const getChallenges = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -19,7 +19,6 @@ export const getChallenges = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-// ساخت چالش جدید
 export const createChallenge = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -60,7 +59,6 @@ export const createChallenge = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-// ویرایش چالش
 export const updateChallenge = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -92,7 +90,6 @@ export const updateChallenge = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-// چک‌این روزانه
 export const checkIn = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -112,11 +109,9 @@ export const checkIn = async (req: AuthRequest, res: Response): Promise<void> =>
       return;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayKey = today.toISOString().slice(0, 10);
+    const todayKey = toTehranDateKey(new Date());
+    const today = startOfDayTehran(todayKey);
 
-    // چک کن امروز قبلاً چک‌این نکرده
     const dates = challenge.checkInDates
       .split(',')
       .map((d) => d.trim())
@@ -130,30 +125,25 @@ export const checkIn = async (req: AuthRequest, res: Response): Promise<void> =>
       return;
     }
 
-    // چک کن آخرین چک‌این دیروز بوده (برای پیوستگی)
     let newCurrentDays = challenge.currentDays;
 
     if (challenge.lastCheckIn) {
-      const lastDate = new Date(challenge.lastCheckIn);
-      lastDate.setHours(0, 0, 0, 0);
+      const lastKey = toTehranDateKey(challenge.lastCheckIn);
+      const lastDate = startOfDayTehran(lastKey);
 
       const diffDays = Math.round(
         (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
       );
 
       if (diffDays === 1) {
-        // پیوسته
         newCurrentDays += 1;
       } else if (diffDays > 1) {
-        // قطع شده، از ۱ شروع کن
         newCurrentDays = 1;
       }
     } else {
-      // اولین چک‌این
       newCurrentDays = 1;
     }
 
-    // چک کن به هدف رسیده
     const isCompleted = newCurrentDays >= challenge.targetDays;
 
     const updated = await prisma.challenge.update({
@@ -177,7 +167,6 @@ export const checkIn = async (req: AuthRequest, res: Response): Promise<void> =>
   }
 };
 
-// لغو چالش
 export const cancelChallenge = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -201,7 +190,6 @@ export const cancelChallenge = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-// فعال‌سازی مجدد چالش
 export const reactivateChallenge = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -225,7 +213,6 @@ export const reactivateChallenge = async (req: AuthRequest, res: Response): Prom
   }
 };
 
-// حذف چالش
 export const deleteChallenge = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;

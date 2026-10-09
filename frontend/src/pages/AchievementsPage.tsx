@@ -5,15 +5,18 @@ import {
   type Achievement,
   type AchievementCategory,
 } from '../services/achievements.service';
+import { useTranslation } from '../i18n/useTranslation';
+import { useLanguageStore } from '../store/language.store';
+import { translations } from '../i18n/translations';
 
-const CATEGORIES: { value: AchievementCategory | 'all'; label: string; emoji: string }[] = [
-  { value: 'all', label: 'همه', emoji: '🏆' },
-  { value: 'workout', label: 'تمرینات', emoji: '💪' },
-  { value: 'streak', label: 'پیوستگی', emoji: '🔥' },
-  { value: 'water', label: 'آب', emoji: '💧' },
-  { value: 'weight', label: 'وزن', emoji: '⚖️' },
-  { value: 'nutrition', label: 'تغذیه', emoji: '🍎' },
-  { value: 'goal', label: 'اهداف', emoji: '🎯' },
+const CATEGORIES: { value: AchievementCategory | 'all'; labelKey: string; emoji: string }[] = [
+  { value: 'all', labelKey: 'achievements.filterAll', emoji: '🏆' },
+  { value: 'workout', labelKey: 'achievements.filterWorkout', emoji: '💪' },
+  { value: 'streak', labelKey: 'achievements.filterStreak', emoji: '🔥' },
+  { value: 'water', labelKey: 'achievements.filterWater', emoji: '💧' },
+  { value: 'weight', labelKey: 'achievements.filterWeight', emoji: '⚖️' },
+  { value: 'nutrition', labelKey: 'achievements.filterNutrition', emoji: '🍎' },
+  { value: 'goal', labelKey: 'achievements.filterGoal', emoji: '🎯' },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ring: string }> = {
@@ -98,6 +101,7 @@ const COLOR_MAP: Record<string, { bg: string; text: string; border: string; ring
 };
 
 export default function AchievementsPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<AchievementCategory | 'all'>('all');
 
   const { data, isLoading } = useQuery({
@@ -109,7 +113,7 @@ export default function AchievementsPage() {
     return (
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-          مدال‌های من 🏆
+          {t('achievements.title')} 🏆
         </h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -135,10 +139,10 @@ export default function AchievementsPage() {
       {/* Header */}
       <div className="mb-6 animate-fade-in-up">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          مدال‌های من 🏆
+          {t('achievements.title')} 🏆
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          با هر دستاورد، یه مدال جدید باز می‌کنی
+          {t('achievements.subtitle')}
         </p>
       </div>
 
@@ -146,7 +150,9 @@ export default function AchievementsPage() {
       <div className="bg-gradient-to-l from-emerald-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/20 mb-6 animate-fade-in-up delay-1">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-emerald-50 text-sm mb-1">مدال‌های باز‌شده</p>
+            <p className="text-emerald-50 text-sm mb-1">
+              {t('achievements.unlockedCount')}
+            </p>
             <p className="text-3xl font-bold">
               {summary.unlocked}{' '}
               <span className="text-lg font-normal opacity-75">/ {summary.total}</span>
@@ -162,7 +168,7 @@ export default function AchievementsPage() {
           />
         </div>
         <p className="text-xs text-emerald-50 mt-2">
-          {summary.percent}% تکمیل شده
+          {summary.percent}% {t('achievements.percentComplete')}
         </p>
       </div>
 
@@ -179,7 +185,7 @@ export default function AchievementsPage() {
             }`}
           >
             <span>{cat.emoji}</span>
-            <span>{cat.label}</span>
+            <span>{t(cat.labelKey as never)}</span>
           </button>
         ))}
       </div>
@@ -189,7 +195,7 @@ export default function AchievementsPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-12 text-center animate-scale-in">
           <div className="text-6xl mb-4 animate-float">🏆</div>
           <p className="text-slate-500 dark:text-slate-400">
-            در این دسته مدالی وجود نداره
+            {t('achievements.noAchievement')}
           </p>
         </div>
       ) : (
@@ -214,6 +220,23 @@ function AchievementCard({
   achievement: Achievement;
   delay: number;
 }) {
+  const { t } = useTranslation();
+  const language = useLanguageStore((s) => s.language);
+
+  // === دسترسی مستقیم به translations (بدون t) ===
+  const achT = translations[language].achievements as unknown as {
+    items?: Record<string, { title: string; description: string }>;
+    units?: Record<string, string>;
+  };
+
+  const itemsMap = achT.items ?? {};
+  const unitsMap = achT.units ?? {};
+
+  const textItem = itemsMap[achievement.id];
+  const title = textItem?.title ?? achievement.id;
+  const description = textItem?.description ?? '';
+  const unit = unitsMap[achievement.unitKey] ?? achievement.unitKey;
+
   const colors = COLOR_MAP[achievement.color] ?? COLOR_MAP.bronze;
   const progressPercent = Math.min(
     100,
@@ -226,30 +249,25 @@ function AchievementCard({
         className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 p-5 shadow-sm card-hover text-center animate-fade-in-up relative overflow-hidden"
         style={{ animationDelay: `${delay}s` }}
       >
-        {/* Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-100/40 to-transparent dark:from-yellow-900/10 pointer-events-none" />
 
-        {/* Badge */}
         <div
           className={`relative w-20 h-20 mx-auto mb-3 rounded-full ${colors.bg} flex items-center justify-center text-4xl shadow-lg ring-4 ${colors.ring} ring-opacity-30 animate-bounce-in`}
         >
           {achievement.emoji}
         </div>
 
-        {/* Title */}
         <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-          {achievement.title}
+          {title}
         </h3>
 
-        {/* Description */}
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 min-h-[32px]">
-          {achievement.description}
+          {description}
         </p>
 
-        {/* Unlocked Badge */}
         <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
           <span>✓</span>
-          <span>باز شده</span>
+          <span>{t('achievements.unlocked')}</span>
         </div>
       </div>
     );
@@ -260,7 +278,6 @@ function AchievementCard({
       className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 p-5 shadow-sm text-center opacity-70 hover:opacity-100 transition-all animate-fade-in-up"
       style={{ animationDelay: `${delay}s` }}
     >
-      {/* Badge - Locked */}
       <div className="relative w-20 h-20 mx-auto mb-3 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-4xl grayscale">
         {achievement.emoji}
         <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 rounded-full">
@@ -268,17 +285,14 @@ function AchievementCard({
         </div>
       </div>
 
-      {/* Title */}
       <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">
-        {achievement.title}
+        {title}
       </h3>
 
-      {/* Description */}
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3 min-h-[32px]">
-        {achievement.description}
+        {description}
       </p>
 
-      {/* Progress Bar */}
       <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-2">
         <div
           className="h-full bg-gradient-to-l from-emerald-400 to-cyan-500 transition-all duration-700"
@@ -286,9 +300,8 @@ function AchievementCard({
         />
       </div>
 
-      {/* Progress Text */}
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        {achievement.progress} / {achievement.requirement} {achievement.unit}
+        {achievement.progress} / {achievement.requirement} {unit}
       </p>
     </div>
   );

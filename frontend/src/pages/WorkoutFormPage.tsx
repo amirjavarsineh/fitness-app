@@ -4,14 +4,15 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { workoutService, type CreateWorkoutDto } from '../services/workout.service';
 import { useEffect } from 'react';
 import ExercisePicker from '../components/ExercisePicker';
+import { useTranslation } from '../i18n/useTranslation';
 
 const WORKOUT_TYPES = [
-  { value: 'CARDIO', label: 'هوازی', emoji: '🏃' },
-  { value: 'STRENGTH', label: 'قدرتی', emoji: '💪' },
-  { value: 'FLEXIBILITY', label: 'انعطاف', emoji: '🤸' },
-  { value: 'HIIT', label: 'HIIT', emoji: '🔥' },
-  { value: 'YOGA', label: 'یوگا', emoji: '🧘' },
-  { value: 'OTHER', label: 'سایر', emoji: '⭐' },
+  { value: 'CARDIO', labelKey: 'workoutTypes.CARDIO', emoji: '🏃' },
+  { value: 'STRENGTH', labelKey: 'workoutTypes.STRENGTH', emoji: '💪' },
+  { value: 'FLEXIBILITY', labelKey: 'workoutTypes.FLEXIBILITY', emoji: '🤸' },
+  { value: 'HIIT', labelKey: 'workoutTypes.HIIT', emoji: '🔥' },
+  { value: 'YOGA', labelKey: 'workoutTypes.YOGA', emoji: '🧘' },
+  { value: 'OTHER', labelKey: 'workoutTypes.OTHER', emoji: '⭐' },
 ] as const;
 
 export default function WorkoutFormPage() {
@@ -19,6 +20,7 @@ export default function WorkoutFormPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isEdit = !!id;
+  const { t } = useTranslation();
 
   const { data: workout, isLoading } = useQuery({
     queryKey: ['workout', id],
@@ -40,6 +42,7 @@ export default function WorkoutFormPage() {
       description: '',
       type: 'STRENGTH',
       duration: 30,
+      isTemplate: false,
       exercises: [
         { name: '', sets: 3, reps: 10, weight: null, duration: null, restTime: 60, order: 0 },
       ],
@@ -52,6 +55,7 @@ export default function WorkoutFormPage() {
   });
 
   const selectedType = watch('type');
+  const isTemplate = watch('isTemplate');
 
   useEffect(() => {
     if (workout) {
@@ -60,6 +64,7 @@ export default function WorkoutFormPage() {
         description: workout.description ?? '',
         type: workout.type,
         duration: workout.duration,
+        isTemplate: workout.isTemplate,
         exercises: workout.exercises.map(({ id, workoutId, createdAt, ...rest }) => rest),
       });
     }
@@ -70,6 +75,7 @@ export default function WorkoutFormPage() {
       isEdit ? workoutService.updateWorkout(id!, data) : workoutService.createWorkout(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
       navigate('/workouts');
     },
   });
@@ -77,7 +83,9 @@ export default function WorkoutFormPage() {
   if (isEdit && isLoading) {
     return (
       <div className="max-w-3xl mx-auto">
-        <p className="text-slate-400 dark:text-slate-500 animate-pulse-soft">در حال بارگذاری...</p>
+        <p className="text-slate-400 dark:text-slate-500 animate-pulse-soft">
+          {t('common.loading')}
+        </p>
       </div>
     );
   }
@@ -88,16 +96,16 @@ export default function WorkoutFormPage() {
       <div className="mb-6 animate-fade-in-up">
         <button
           onClick={() => navigate('/workouts')}
-          className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1 transition-all hover:translate-x-[-3px]"
+          className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1 transition-all hover:translate-x-[-3px] rtl:hover:translate-x-[-3px] ltr:hover:translate-x-[3px]"
         >
-          <span>→</span>
-          <span>بازگشت به تمرینات</span>
+          <span className="rtl:rotate-0 ltr:rotate-180">→</span>
+          <span>{t('workouts.backToWorkouts')}</span>
         </button>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {isEdit ? 'ویرایش تمرین' : 'تمرین جدید'}
+          {isEdit ? t('workouts.formEditTitle') : t('workouts.formTitle')}
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {isEdit ? 'تغییرات رو اعمال کن' : 'یه تمرین جدید بساز'}
+          {isEdit ? t('workouts.formEditDesc') : t('workouts.formNewDesc')}
         </p>
       </div>
 
@@ -105,19 +113,19 @@ export default function WorkoutFormPage() {
         {/* Basic Info */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-1 card-hover">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>📝</span> اطلاعات پایه
+            <span>📝</span> {t('workouts.basicInfo')}
           </h2>
 
           <div className="space-y-4">
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                نام تمرین
+                {t('workouts.workoutName')}
               </label>
               <input
                 type="text"
                 {...register('name')}
-                placeholder="مثلاً تمرین صبحگاهی"
+                placeholder={t('workouts.workoutNamePlaceholder')}
                 className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
@@ -125,12 +133,12 @@ export default function WorkoutFormPage() {
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                توضیحات
+                {t('workouts.description')}
               </label>
               <textarea
                 rows={2}
                 {...register('description')}
-                placeholder="توضیحات اختیاری..."
+                placeholder={t('workouts.descriptionPlaceholder')}
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
               />
             </div>
@@ -138,7 +146,7 @@ export default function WorkoutFormPage() {
             {/* Type */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                نوع تمرین *
+                {t('workouts.workoutType')} *
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {WORKOUT_TYPES.map((type) => (
@@ -155,13 +163,17 @@ export default function WorkoutFormPage() {
                     }`}
                   >
                     <span className="text-xl">{type.emoji}</span>
-                    <span className="text-xs font-medium">{type.label}</span>
+                    <span className="text-xs font-medium">
+                      {t(type.labelKey as never)}
+                    </span>
                   </button>
                 ))}
               </div>
               <input
                 type="hidden"
-                {...register('type', { required: 'نوع تمرین الزامی است' })}
+                {...register('type', {
+                  required: t('workouts.workoutType') + ' ' + t('common.required'),
+                })}
               />
               {errors.type && (
                 <span className="text-xs text-red-500 mt-1 block animate-wiggle">
@@ -173,15 +185,15 @@ export default function WorkoutFormPage() {
             {/* Duration */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                مدت زمان (دقیقه) *
+                {t('workouts.duration')} *
               </label>
               <input
                 type="number"
                 min={1}
                 {...register('duration', {
-                  required: 'مدت زمان الزامی است',
+                  required: t('workouts.durationError'),
                   valueAsNumber: true,
-                  min: { value: 1, message: 'حداقل ۱ دقیقه' },
+                  min: { value: 1, message: t('workouts.durationMin') },
                 })}
                 className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
@@ -191,6 +203,52 @@ export default function WorkoutFormPage() {
                 </span>
               )}
             </div>
+
+            {/* Template Checkbox */}
+            <div
+              className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                isTemplate
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+              }`}
+              onClick={() => setValue('isTemplate', !isTemplate)}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                    isTemplate
+                      ? 'bg-purple-500 border-purple-500'
+                      : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                  }`}
+                >
+                  {isTemplate && (
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <input type="hidden" {...register('isTemplate')} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>📋</span>
+                    <span>{t('workouts.templateLabel')}</span>
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {t('workouts.templateDesc')}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -198,7 +256,7 @@ export default function WorkoutFormPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-2 card-hover">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>🏋️</span> حرکات
+              <span>🏋️</span> {t('workouts.exercises')}
               <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full">
                 {fields.length}
               </span>
@@ -218,7 +276,7 @@ export default function WorkoutFormPage() {
               }
               className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all hover:scale-105"
             >
-              + افزودن حرکت
+              + {t('workouts.addExercise')}
             </button>
           </div>
 
@@ -236,7 +294,7 @@ export default function WorkoutFormPage() {
                       {index + 1}
                     </span>
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      حرکت {index + 1}
+                      {t('workouts.exerciseN')} {index + 1}
                     </span>
                   </div>
                   {fields.length > 1 && (
@@ -244,7 +302,7 @@ export default function WorkoutFormPage() {
                       type="button"
                       onClick={() => remove(index)}
                       className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 text-sm transition-all hover:scale-110"
-                      title="حذف"
+                      title={t('common.delete')}
                     >
                       ✕
                     </button>
@@ -253,20 +311,19 @@ export default function WorkoutFormPage() {
 
                 {/* Exercise Fields */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {/* Name with ExercisePicker */}
                   <div className="col-span-2 md:col-span-1">
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      نام حرکت *
+                      {t('workouts.exerciseName')} *
                     </label>
                     <Controller
                       control={control}
                       name={`exercises.${index}.name`}
-                      rules={{ required: 'الزامی' }}
+                      rules={{ required: t('workouts.requiredShort') }}
                       render={({ field }) => (
                         <ExercisePicker
                           value={field.value ?? ''}
                           onChange={field.onChange}
-                          placeholder="تایپ کن یا از لیست انتخاب کن"
+                          placeholder={t('workouts.exerciseNamePlaceholder')}
                         />
                       )}
                     />
@@ -279,7 +336,7 @@ export default function WorkoutFormPage() {
 
                   <div>
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      ست
+                      {t('workouts.sets')}
                     </label>
                     <input
                       type="number"
@@ -293,7 +350,7 @@ export default function WorkoutFormPage() {
 
                   <div>
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      تکرار
+                      {t('workouts.reps')}
                     </label>
                     <input
                       type="number"
@@ -307,7 +364,7 @@ export default function WorkoutFormPage() {
 
                   <div>
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      وزن (kg)
+                      {t('workouts.weightKg')}
                     </label>
                     <input
                       type="number"
@@ -315,14 +372,14 @@ export default function WorkoutFormPage() {
                       {...register(`exercises.${index}.weight`, {
                         setValueAs: (v) => (v === '' ? null : Number(v)),
                       })}
-                      placeholder="اختیاری"
+                      placeholder={t('common.optional')}
                       className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      استراحت (ثانیه)
+                      {t('workouts.restTime')}
                     </label>
                     <input
                       type="number"
@@ -348,7 +405,7 @@ export default function WorkoutFormPage() {
         {mutation.isError && (
           <div className="flex items-center gap-2 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm animate-wiggle">
             <span className="text-lg">⚠️</span>
-            <span>خطا در ذخیره‌سازی. دوباره تلاش کن</span>
+            <span>{t('workouts.workoutError')}</span>
           </div>
         )}
 
@@ -359,14 +416,18 @@ export default function WorkoutFormPage() {
             disabled={mutation.isPending}
             className="flex-1 h-14 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
           >
-            {mutation.isPending ? 'در حال ذخیره...' : isEdit ? '💾 ذخیره تغییرات' : '✅ ایجاد تمرین'}
+            {mutation.isPending
+              ? t('common.saving')
+              : isEdit
+              ? '💾 ' + t('workouts.saveChanges')
+              : '✅ ' + t('workouts.createWorkout')}
           </button>
           <button
             type="button"
             onClick={() => navigate('/workouts')}
             className="px-6 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
           >
-            انصراف
+            {t('common.cancel')}
           </button>
         </div>
       </form>

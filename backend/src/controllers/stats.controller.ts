@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
-// ===== Helpers =====
 function toDateKey(d: Date): string {
   const date = new Date(d);
   date.setHours(0, 0, 0, 0);
@@ -12,7 +11,6 @@ function toDateKey(d: Date): string {
 function calculateStreaks(dateKeys: Set<string>): { current: number; best: number } {
   if (dateKeys.size === 0) return { current: 0, best: 0 };
 
-  // Current streak
   let current = 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -28,7 +26,6 @@ function calculateStreaks(dateKeys: Set<string>): { current: number; best: numbe
     checkDate.setDate(checkDate.getDate() - 1);
   }
 
-  // Best streak
   const sorted = Array.from(dateKeys).sort();
   let best = 1;
   let running = 1;
@@ -50,7 +47,6 @@ function calculateStreaks(dateKeys: Set<string>): { current: number; best: numbe
   return { current, best };
 }
 
-// ===== Main Controller =====
 export const getStats = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
@@ -59,6 +55,8 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(todayStart);
     weekStart.setDate(weekStart.getDate() - 6);
+    const monthStart = new Date(todayStart);
+    monthStart.setDate(monthStart.getDate() - 29);
 
     const [
       totalWorkouts,
@@ -73,13 +71,17 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
       weightLogs,
       allWorkoutDates,
       allWaterLogs,
+      monthWeights,
+      weekNutritionLogs,
+      weekWaterLogs,
+      weekWorkouts,
     ] = await Promise.all([
-      prisma.workout.count({ where: { userId } }),
+      prisma.workout.count({ where: { userId, isTemplate: false } }),
       prisma.workout.count({
-        where: { userId, createdAt: { gte: weekStart } },
+        where: { userId, isTemplate: false, createdAt: { gte: weekStart } },
       }),
       prisma.workout.findMany({
-        where: { userId },
+        where: { userId, isTemplate: false },
         orderBy: { createdAt: 'desc' },
         take: 5,
         include: {
@@ -122,7 +124,7 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
         orderBy: { date: 'asc' },
       }),
       prisma.workout.findMany({
-        where: { userId },
+        where: { userId, isTemplate: false },
         select: { date: true },
         orderBy: { date: 'desc' },
       }),
@@ -130,6 +132,24 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
         where: { userId },
         select: { date: true, amount: true },
         orderBy: { date: 'desc' },
+      }),
+      prisma.weightLog.findMany({
+        where: { userId, date: { gte: monthStart } },
+        orderBy: { date: 'asc' },
+      }),
+      prisma.nutritionLog.findMany({
+        where: { userId, createdAt: { gte: weekStart } },
+        select: { calories: true, createdAt: true },
+        orderBy: { createdAt: 'asc' },
+      }),
+      prisma.waterLog.findMany({
+        where: { userId, date: { gte: weekStart } },
+        orderBy: { date: 'asc' },
+      }),
+      prisma.workout.findMany({
+        where: { userId, isTemplate: false, date: { gte: weekStart } },
+        select: { date: true, duration: true, caloriesBurned: true },
+        orderBy: { date: 'asc' },
       }),
     ]);
 
@@ -171,7 +191,6 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
       };
     }
 
-    // ===== Streaks =====
     const workoutDateKeys = new Set(
       allWorkoutDates.map((w) => toDateKey(w.date))
     );
@@ -185,6 +204,88 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     const workoutStreak = calculateStreaks(workoutDateKeys);
     const waterStreak = calculateStreaks(waterMetDateKeys);
     const weightStreak = calculateStreaks(weightDateKeys);
+
+    // ===== Chart Data =====
+    // تاریخ‌ها به فرمت ISO خام (YYYY-MM-DD) فرستاده می‌شن
+    // تا فرانت بر اساس زبان کاربر فرمت کنه
+
+    // 1. Weight chart (last 30 days)
+    const weightChart = monthWeights.map((w) => ({
+      date: toDateKey(new Date(w.date)),
+      weight: w.weight,
+    }));
+
+    // 2. Calories chart (last 7 days)
+    const calorieMap: Record<string, { consumed: number; burned: number }> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(todayStart);
+      d.setDate(d.getDate() - i);
+      const key = toDateKey(d);
+      calorieMap[key] = { consumed: 0, burned: 0 };
+    }
+
+    for (const log of weekNutritionLogs) {
+      const key = toDateKey(new Date(log.createdAt));
+      if (calorieMap[key]) {
+        calorieMap[key].consumed += log.calories;
+      }
+    }
+
+    for (const w of weekWorkouts) {
+      const key = toDateKey(new Date(w.date));
+      if (calorieMap[key]) {
+        calorieMap[key].burned += w.caloriesBurned ?? 0;
+      }
+    }
+
+    const caloriesChart = Object.entries(calorieMap).map(([key, val]) => ({
+      date: key,
+      consumed: val.consumed,
+      burned: val.burned,
+    }));
+
+    // 3. Water chart (last 7 days)
+    const waterMap: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(todayStart);
+      d.setDate(d.getDate() - i);
+      waterMap[toDateKey(d)] = 0;
+    }
+
+    for (const log of weekWaterLogs) {
+      const key = toDateKey(new Date(log.date));
+      if (waterMap[key] !== undefined) {
+        waterMap[key] = log.amount;
+      }
+    }
+
+    const waterChart = Object.entries(waterMap).map(([key, amount]) => ({
+      date: key,
+      amount,
+      goal: DAILY_WATER_GOAL,
+    }));
+
+    // 4. Workouts chart (last 7 days)
+    const workoutMap: Record<string, { count: number; duration: number }> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(todayStart);
+      d.setDate(d.getDate() - i);
+      workoutMap[toDateKey(d)] = { count: 0, duration: 0 };
+    }
+
+    for (const w of weekWorkouts) {
+      const key = toDateKey(new Date(w.date));
+      if (workoutMap[key]) {
+        workoutMap[key].count += 1;
+        workoutMap[key].duration += w.duration;
+      }
+    }
+
+    const workoutsChart = Object.entries(workoutMap).map(([key, val]) => ({
+      date: key,
+      count: val.count,
+      minutes: val.duration,
+    }));
 
     res.json({
       success: true,
@@ -223,6 +324,12 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
           water: waterStreak,
           weight: weightStreak,
         },
+      },
+      charts: {
+        weight: weightChart,
+        calories: caloriesChart,
+        water: waterChart,
+        workouts: workoutsChart,
       },
     });
   } catch (error) {

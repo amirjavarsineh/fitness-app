@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { waterService } from '../services/water.service';
+import { useTranslation } from '../i18n/useTranslation';
 
 const QUICK_ADD = [
-  { amount: 200, label: '۱ لیوان', emoji: '🥛' },
-  { amount: 330, label: '۱ قوطی', emoji: '🥤' },
-  { amount: 500, label: '۱ بطری', emoji: '🍶' },
-  { amount: 750, label: 'بطری بزرگ', emoji: '🧴' },
+  { amount: 200, labelKey: 'water.glass', emoji: '🥛' },
+  { amount: 330, labelKey: 'water.can', emoji: '🥤' },
+  { amount: 500, labelKey: 'water.bottle', emoji: '🍶' },
+  { amount: 750, labelKey: 'water.bigBottle', emoji: '🧴' },
 ];
 
 const GOAL_PRESETS = [
-  { value: 1500, label: '۱.۵ لیتر', desc: 'سبک' },
-  { value: 2000, label: '۲ لیتر', desc: 'معمولی' },
-  { value: 2500, label: '۲.۵ لیتر', desc: 'ورزشکار' },
-  { value: 3000, label: '۳ لیتر', desc: 'فعال' },
+  { value: 1500, label: '1.5', descKey: 'water.light' },
+  { value: 2000, label: '2', descKey: 'water.normal' },
+  { value: 2500, label: '2.5', descKey: 'water.athlete' },
+  { value: 3000, label: '3', descKey: 'water.active' },
 ];
 
 export default function WaterPage() {
   const queryClient = useQueryClient();
+  const { t, language } = useTranslation();
   const [showGoalEdit, setShowGoalEdit] = useState(false);
   const [customGoal, setCustomGoal] = useState('');
 
@@ -60,10 +62,14 @@ export default function WaterPage() {
     },
   });
 
+  const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+
   if (todayLoading) {
     return (
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">مصرف آب</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+          {t('water.title')}
+        </h1>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 animate-pulse-soft h-80" />
       </div>
     );
@@ -83,9 +89,11 @@ export default function WaterPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">مصرف آب</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {t('water.title')}
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            هدف روزانه: {(dailyGoal / 1000).toFixed(1)} لیتر
+            {t('water.dailyGoal')}: {(dailyGoal / 1000).toFixed(1)} {t('water.liters')}
           </p>
         </div>
         <button
@@ -93,7 +101,7 @@ export default function WaterPage() {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:scale-105"
         >
           <span>⚙️</span>
-          <span>تغییر هدف</span>
+          <span>{t('water.changeGoal')}</span>
         </button>
       </div>
 
@@ -101,7 +109,7 @@ export default function WaterPage() {
       {showGoalEdit && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-scale-in">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-            🎯 هدف روزانه‌ت رو انتخاب کن
+            {t('water.pickGoal')}
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -116,23 +124,24 @@ export default function WaterPage() {
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700'
                 }`}
               >
-                <span className="text-xl font-bold">{preset.label}</span>
-                <span className="text-xs">{preset.desc}</span>
+                <span className="text-xl font-bold">
+                  {preset.label} {t('water.liters')}
+                </span>
+                <span className="text-xs">{t(preset.descKey as never)}</span>
               </button>
             ))}
           </div>
 
-          {/* Custom Goal */}
           <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              مقدار دلخواه (ml)
+              {t('water.customAmount')}
             </label>
             <div className="flex gap-2">
               <input
                 type="number"
                 value={customGoal}
                 onChange={(e) => setCustomGoal(e.target.value)}
-                placeholder="مثلاً 2200"
+                placeholder={t('water.customPlaceholder')}
                 min={500}
                 max={10000}
                 className="flex-1 h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
@@ -144,14 +153,19 @@ export default function WaterPage() {
                     goalMutation.mutate(num);
                   }
                 }}
-                disabled={!customGoal || Number(customGoal) < 500 || Number(customGoal) > 10000 || goalMutation.isPending}
+                disabled={
+                  !customGoal ||
+                  Number(customGoal) < 500 ||
+                  Number(customGoal) > 10000 ||
+                  goalMutation.isPending
+                }
                 className="px-6 h-12 rounded-xl bg-gradient-to-l from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                ذخیره
+                {t('water.saveGoal')}
               </button>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              💡 یه توصیه کلی: روزانه حدود ۳۵ میلی‌لیتر به ازای هر کیلوگرم وزن بدن.
+              {t('water.tip')}
             </p>
           </div>
         </div>
@@ -196,7 +210,7 @@ export default function WaterPage() {
                 {currentAmount}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                از {dailyGoal} ml
+                {t('water.from')} {dailyGoal} ml
               </span>
               <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400 mt-1">
                 {percent}%
@@ -210,11 +224,11 @@ export default function WaterPage() {
                 <span className="font-bold text-cyan-600 dark:text-cyan-400">
                   {remaining} ml
                 </span>{' '}
-                دیگه تا رسیدن به هدف! 💪
+                {t('water.remaining')} 💪
               </>
             ) : (
               <span className="font-bold text-emerald-600 dark:text-emerald-400 animate-bounce-in">
-                🎉 عالیه! به هدف امروزت رسیدی!
+                {t('water.goalReached')}
               </span>
             )}
           </p>
@@ -224,7 +238,7 @@ export default function WaterPage() {
       {/* Quick Add */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-2 card-hover">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span>➕</span> افزودن سریع
+          <span>➕</span> {t('water.quickAdd')}
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -237,7 +251,9 @@ export default function WaterPage() {
               style={{ animationDelay: `${0.03 * i}s` }}
             >
               <span className="text-2xl">{item.emoji}</span>
-              <span className="text-xs text-slate-600 dark:text-slate-400">{item.label}</span>
+              <span className="text-xs text-slate-600 dark:text-slate-400">
+                {t(item.labelKey as never)}
+              </span>
               <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
                 {item.amount} ml
               </span>
@@ -245,36 +261,42 @@ export default function WaterPage() {
           ))}
         </div>
 
-        <CustomAmountForm onAdd={(amt) => addMutation.mutate(amt)} />
+        <CustomAmountForm onAdd={(amt) => addMutation.mutate(amt)} t={t} />
       </div>
 
       {/* Weekly Stats */}
       {stats && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-3 card-hover">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>📊</span> این هفته
+            <span>📊</span> {t('water.thisWeek')}
           </h2>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="text-center p-3 rounded-xl bg-cyan-50 dark:bg-cyan-900/30 transition-transform hover:scale-105">
-              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">مجموع هفته</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                {t('water.weekTotal')}
+              </p>
               <p className="text-lg font-bold text-cyan-600 dark:text-cyan-400">
                 {stats.totalWeek}
                 <span className="text-xs mr-1">ml</span>
               </p>
             </div>
             <div className="text-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30 transition-transform hover:scale-105">
-              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">میانگین روزانه</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                {t('water.dailyAvg')}
+              </p>
               <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 {stats.avgDaily}
                 <span className="text-xs mr-1">ml</span>
               </p>
             </div>
             <div className="text-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 transition-transform hover:scale-105">
-              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">روزهای ثبت</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                {t('water.daysLogged')}
+              </p>
               <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {stats.logs.length}
-                <span className="text-xs mr-1">روز</span>
+                <span className="text-xs mr-1">{t('water.days')}</span>
               </p>
             </div>
           </div>
@@ -289,7 +311,7 @@ export default function WaterPage() {
                   style={{ animationDelay: `${0.05 * i}s` }}
                 >
                   <span className="w-20 text-slate-500 dark:text-slate-400">
-                    {new Date(log.date).toLocaleDateString('fa-IR', { weekday: 'short' })}
+                    {new Date(log.date).toLocaleDateString(locale, { weekday: 'short' })}
                   </span>
                   <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
@@ -297,7 +319,7 @@ export default function WaterPage() {
                       style={{ width: `${dayPercent}%` }}
                     />
                   </div>
-                  <span className="w-16 text-left text-slate-600 dark:text-slate-400 font-medium">
+                  <span className="w-16 text-end text-slate-600 dark:text-slate-400 font-medium">
                     {log.amount} ml
                   </span>
                 </div>
@@ -310,20 +332,26 @@ export default function WaterPage() {
       {/* Reset */}
       <button
         onClick={() => {
-          if (confirm('آب امروز ریست بشه؟')) {
+          if (confirm(t('water.resetConfirm'))) {
             resetMutation.mutate();
           }
         }}
         disabled={resetMutation.isPending || currentAmount === 0}
         className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 text-slate-600 dark:text-slate-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed animate-fade-in-up delay-4"
       >
-        🔄 ریست آب امروز
+        🔄 {t('water.resetToday')}
       </button>
     </div>
   );
 }
 
-function CustomAmountForm({ onAdd }: { onAdd: (amount: number) => void }) {
+function CustomAmountForm({
+  onAdd,
+  t,
+}: {
+  onAdd: (amount: number) => void;
+  t: (key: never) => string;
+}) {
   const [value, setValue] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -341,7 +369,7 @@ function CustomAmountForm({ onAdd }: { onAdd: (amount: number) => void }) {
         type="number"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="مقدار دلخواه (ml)"
+        placeholder={t('water.customAmount2' as never)}
         className="flex-1 h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
       />
       <button
@@ -349,7 +377,7 @@ function CustomAmountForm({ onAdd }: { onAdd: (amount: number) => void }) {
         disabled={!value || Number(value) <= 0}
         className="px-6 h-12 rounded-xl bg-gradient-to-l from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
       >
-        افزودن
+        {t('water.add' as never)}
       </button>
     </form>
   );
