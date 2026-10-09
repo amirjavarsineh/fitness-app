@@ -40,6 +40,7 @@ export interface CreateWorkoutDto {
   notes?: string;
   exercises?: WorkoutExercise[];
   isTemplate?: boolean;
+  date?: string;
 }
 
 export interface UpdateWorkoutDto extends CreateWorkoutDto {}

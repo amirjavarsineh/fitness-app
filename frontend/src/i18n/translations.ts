@@ -275,6 +275,8 @@ export const translations = {
       useTemplateSuccess: 'تمرین از قالب ساخته شد!',
       useTemplateError: 'خطا در ساخت تمرین از قالب',
       deleteTemplateConfirm: 'این قالب حذف بشه؟',
+      dateLabel: 'تاریخ تمرین',
+      dateHint: 'می‌تونی تاریخ گذشته رو هم انتخاب کنی',
     },
 
     nutrition: {
@@ -1011,6 +1013,8 @@ export const translations = {
       useTemplateSuccess: 'Workout created from template!',
       useTemplateError: 'Failed to create from template',
       deleteTemplateConfirm: 'Delete this template?',
+      dateLabel: 'Workout Date',
+      dateHint: 'You can also pick a past date',
     },
 
     nutrition: {

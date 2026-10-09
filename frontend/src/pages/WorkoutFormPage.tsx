@@ -15,6 +15,24 @@ const WORKOUT_TYPES = [
   { value: 'OTHER', labelKey: 'workoutTypes.OTHER', emoji: '⭐' },
 ] as const;
 
+// تاریخ امروز به فرمت YYYY-MM-DD بر اساس timezone کاربر
+function todayLocalISO(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// تبدیل تاریخ دریافتی از سرور به فرمت input type="date"
+function toDateInputValue(dateStr: string): string {
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export default function WorkoutFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -42,6 +60,7 @@ export default function WorkoutFormPage() {
       description: '',
       type: 'STRENGTH',
       duration: 30,
+      date: todayLocalISO(),
       isTemplate: false,
       exercises: [
         { name: '', sets: 3, reps: 10, weight: null, duration: null, restTime: 60, order: 0 },
@@ -64,7 +83,8 @@ export default function WorkoutFormPage() {
         description: workout.description ?? '',
         type: workout.type,
         duration: workout.duration,
-        isTemplate: workout.isTemplate,
+        date: workout.date ? toDateInputValue(workout.date) : todayLocalISO(),
+        isTemplate: workout.isTemplate ?? false,
         exercises: workout.exercises.map(({ id, workoutId, createdAt, ...rest }) => rest),
       });
     }
@@ -182,26 +202,42 @@ export default function WorkoutFormPage() {
               )}
             </div>
 
-            {/* Duration */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('workouts.duration')} *
-              </label>
-              <input
-                type="number"
-                min={1}
-                {...register('duration', {
-                  required: t('workouts.durationError'),
-                  valueAsNumber: true,
-                  min: { value: 1, message: t('workouts.durationMin') },
-                })}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-              {errors.duration && (
-                <span className="text-xs text-red-500 mt-1 block animate-wiggle">
-                  {errors.duration.message}
-                </span>
-              )}
+            {/* Duration + Date */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  {t('workouts.duration')} *
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  {...register('duration', {
+                    required: t('workouts.durationError'),
+                    valueAsNumber: true,
+                    min: { value: 1, message: t('workouts.durationMin') },
+                  })}
+                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                />
+                {errors.duration && (
+                  <span className="text-xs text-red-500 mt-1 block animate-wiggle">
+                    {errors.duration.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  {t('workouts.dateLabel')}
+                </label>
+                <input
+                  type="date"
+                  {...register('date')}
+                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                />
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  {t('workouts.dateHint')}
+                </p>
+              </div>
             </div>
 
             {/* Template Checkbox */}
