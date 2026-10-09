@@ -19,6 +19,7 @@ import exportRouter from './routes/export.routes';
 import achievementsRouter from './routes/achievements.routes';
 import foodRouter from './routes/food.routes';
 import measurementRouter from './routes/measurement.routes';
+import reminderRouter from './routes/reminder.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -38,13 +39,12 @@ app.use(
 const allowedOrigins = [
   'http://localhost:5173', // Dev
   'http://localhost:4173', // Preview (PWA)
-  process.env.FRONTEND_URL, // Production (اگه تنظیم شده)
+  process.env.FRONTEND_URL, // Production
 ].filter(Boolean) as string[];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // اجازه بده اگه origin نبود (Postman, curl) یا توی لیست بود
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -108,6 +108,7 @@ app.use('/api/export', exportRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/foods', foodRouter);
 app.use('/api/measurements', measurementRouter);
+app.use('/api/reminders', reminderRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

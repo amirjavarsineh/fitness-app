@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
 import InstallPWA from './components/InstallPWA';
+import ReminderNotifier from './components/ReminderNotifier';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -15,6 +16,7 @@ import ReportPage from './pages/ReportPage';
 import ExportPage from './pages/ExportPage';
 import AchievementsPage from './pages/AchievementsPage';
 import MeasurementsPage from './pages/MeasurementsPage';
+import RemindersPage from './pages/RemindersPage';
 import GoalListPage from './pages/goals/GoalListPage';
 import GoalFormPage from './pages/goals/GoalFormPage';
 
@@ -22,6 +24,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <InstallPWA />
+      <ReminderNotifier />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -39,6 +42,7 @@ export default function App() {
             <Route path="/water" element={<WaterPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/measurements" element={<MeasurementsPage />} />
+            <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/export" element={<ExportPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />

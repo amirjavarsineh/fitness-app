@@ -76,6 +76,7 @@ model User {
   nutritionLogs    NutritionLog[]
   goals            Goal[]
   bodyMeasurements BodyMeasurement[]
+  reminders        Reminder[]
 }
 
 model Profile {
@@ -271,4 +272,18 @@ model BodyMeasurement {
   createdAt DateTime @default(now())
 
   @@unique([userId, date])
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String?
+  type      String   @default("CUSTOM")
+  time      String
+  days      String   @default("ALL")
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
