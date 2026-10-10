@@ -2,6 +2,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import {
+  ClipboardList,
+  User,
+  Save,
+  Footprints,
+  Activity,
+  Target,
+  Flame,
+  Armchair,
+  Bike,
+  Dumbbell,
+  TrendingDown,
+  Scale,
+  Mars,
+  Venus,
+} from 'lucide-react';
+import {
   profileService,
   type UpsertProfileDto,
   type ActivityLevel,
@@ -9,23 +25,33 @@ import {
 } from '../services/profile.service';
 import { useTranslation } from '../i18n/useTranslation';
 
+// ==================== Data ====================
+
 const ACTIVITY_LEVELS: {
   value: ActivityLevel;
   labelKey: string;
-  emoji: string;
+  Icon: typeof Footprints;
+  gradient: string;
 }[] = [
-  { value: 'SEDENTARY', labelKey: 'profile.activitySedentary', emoji: '🪑' },
-  { value: 'LIGHTLY_ACTIVE', labelKey: 'profile.activityLightly', emoji: '🚶' },
-  { value: 'MODERATELY_ACTIVE', labelKey: 'profile.activityModerately', emoji: '🏃' },
-  { value: 'VERY_ACTIVE', labelKey: 'profile.activityVery', emoji: '🏋️' },
-  { value: 'EXTRA_ACTIVE', labelKey: 'profile.activityExtra', emoji: '🔥' },
+  { value: 'SEDENTARY', labelKey: 'profile.activitySedentary', Icon: Armchair, gradient: 'from-slate-500 to-slate-700' },
+  { value: 'LIGHTLY_ACTIVE', labelKey: 'profile.activityLightly', Icon: Footprints, gradient: 'from-blue-500 to-cyan-500' },
+  { value: 'MODERATELY_ACTIVE', labelKey: 'profile.activityModerately', Icon: Bike, gradient: 'from-cyan-500 to-teal-500' },
+  { value: 'VERY_ACTIVE', labelKey: 'profile.activityVery', Icon: Dumbbell, gradient: 'from-emerald-500 to-green-500' },
+  { value: 'EXTRA_ACTIVE', labelKey: 'profile.activityExtra', Icon: Flame, gradient: 'from-orange-500 to-red-500' },
 ];
 
-const GOALS: { value: GoalType; labelKey: string; emoji: string }[] = [
-  { value: 'LOSE_WEIGHT', labelKey: 'profile.goalLoseWeight', emoji: '⬇️' },
-  { value: 'MAINTAIN_WEIGHT', labelKey: 'profile.goalMaintainWeight', emoji: '⚖️' },
-  { value: 'GAIN_MUSCLE', labelKey: 'profile.goalGainMuscle', emoji: '💪' },
+const GOALS: {
+  value: GoalType;
+  labelKey: string;
+  Icon: typeof TrendingDown;
+  gradient: string;
+}[] = [
+  { value: 'LOSE_WEIGHT', labelKey: 'profile.goalLoseWeight', Icon: TrendingDown, gradient: 'from-emerald-500 to-teal-500' },
+  { value: 'MAINTAIN_WEIGHT', labelKey: 'profile.goalMaintainWeight', Icon: Scale, gradient: 'from-blue-500 to-indigo-500' },
+  { value: 'GAIN_MUSCLE', labelKey: 'profile.goalGainMuscle', Icon: Dumbbell, gradient: 'from-orange-500 to-rose-500' },
 ];
+
+// ==================== Page ====================
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -62,266 +88,333 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-          {t('profile.title')}
-        </h1>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse-soft h-96" />
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="h-32 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse-soft" />
+        <div className="h-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse-soft" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-6 animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {t('profile.title')}
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {t('profile.subtitle')}
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit((data) => mutation.mutate(data))} noValidate>
-        {/* Body Info */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-1 card-hover">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>📋</span> {t('profile.bodyInfo')}
-          </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Age */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('profile.ageLabel')}
-              </label>
-              <input
-                type="number"
-                {...register('age', {
-                  required: t('profile.ageRequired'),
-                  valueAsNumber: true,
-                  min: { value: 1, message: t('profile.invalid') },
-                })}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-              {errors.age && (
-                <span className="text-xs text-red-500 mt-1 block">
-                  {errors.age.message}
-                </span>
-              )}
-            </div>
-
-            {/* Weight */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('profile.weightLabel')}
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                {...register('weight', {
-                  required: t('profile.weightRequired'),
-                  valueAsNumber: true,
-                  min: { value: 1, message: t('profile.invalid') },
-                })}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-              {errors.weight && (
-                <span className="text-xs text-red-500 mt-1 block">
-                  {errors.weight.message}
-                </span>
-              )}
-            </div>
-
-            {/* Height */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('profile.heightLabel')}
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                {...register('height', {
-                  required: t('profile.heightRequired'),
-                  valueAsNumber: true,
-                  min: { value: 1, message: t('profile.invalid') },
-                })}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-              {errors.height && (
-                <span className="text-xs text-red-500 mt-1 block">
-                  {errors.height.message}
-                </span>
-              )}
-            </div>
-
-            {/* Target Weight */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('profile.targetWeightLabel')}
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                {...register('targetWeight', {
-                  setValueAs: (v) => (v === '' || v === null ? null : Number(v)),
-                })}
-                placeholder={t('profile.targetWeightPlaceholder')}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-            </div>
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* ===== Header ===== */}
+      <div className="flex items-center gap-4 animate-fade-in-up">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 blur-lg opacity-40" />
+          <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center text-white shadow-lg">
+            <User size={28} strokeWidth={2.2} />
           </div>
         </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            {t('profile.title')}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {t('profile.subtitle')}
+          </p>
+        </div>
+      </div>
 
-        {/* Gender */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-2 card-hover">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>👤</span> {t('profile.genderSection')}
-          </h2>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setValue('gender', 'MALE', { shouldValidate: true })}
-              className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 hover:scale-105 ${
-                gender === 'MALE'
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-              }`}
-            >
-              <span className="text-2xl">👨</span>
-              <span className="text-sm font-medium">{t('profile.male')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setValue('gender', 'FEMALE', { shouldValidate: true })}
-              className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 hover:scale-105 ${
-                gender === 'FEMALE'
-                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-              }`}
-            >
-              <span className="text-2xl">👩</span>
-              <span className="text-sm font-medium">{t('profile.female')}</span>
-            </button>
+      <form onSubmit={handleSubmit((data) => mutation.mutate(data))} noValidate className="space-y-6">
+        {/* ===== Body Info ===== */}
+        <SectionCard
+          Icon={ClipboardList}
+          title={t('profile.bodyInfo')}
+          gradient="from-emerald-500 to-teal-500"
+          delay="delay-1"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <FieldInput
+              label={t('profile.ageLabel')}
+              error={errors.age?.message}
+              register={register('age', {
+                required: t('profile.ageRequired'),
+                valueAsNumber: true,
+                min: { value: 1, message: t('profile.invalid') },
+              })}
+            />
+            <FieldInput
+              label={t('profile.weightLabel')}
+              error={errors.weight?.message}
+              step="0.1"
+              register={register('weight', {
+                required: t('profile.weightRequired'),
+                valueAsNumber: true,
+                min: { value: 1, message: t('profile.invalid') },
+              })}
+            />
+            <FieldInput
+              label={t('profile.heightLabel')}
+              error={errors.height?.message}
+              step="0.1"
+              register={register('height', {
+                required: t('profile.heightRequired'),
+                valueAsNumber: true,
+                min: { value: 1, message: t('profile.invalid') },
+              })}
+            />
+            <FieldInput
+              label={t('profile.targetWeightLabel')}
+              placeholder={t('profile.targetWeightPlaceholder')}
+              step="0.1"
+              register={register('targetWeight', {
+                setValueAs: (v) => (v === '' || v === null ? null : Number(v)),
+              })}
+            />
           </div>
+        </SectionCard>
 
+        {/* ===== Gender ===== */}
+        <SectionCard
+          Icon={User}
+          title={t('profile.genderSection')}
+          gradient="from-violet-500 to-fuchsia-500"
+          delay="delay-2"
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <SelectTile
+              Icon={Mars}
+              label={t('profile.male')}
+              isActive={gender === 'MALE'}
+              gradient="from-blue-500 to-cyan-500"
+              onClick={() => setValue('gender', 'MALE', { shouldValidate: true })}
+            />
+            <SelectTile
+              Icon={Venus}
+              label={t('profile.female')}
+              isActive={gender === 'FEMALE'}
+              gradient="from-pink-500 to-rose-500"
+              onClick={() => setValue('gender', 'FEMALE', { shouldValidate: true })}
+            />
+          </div>
           <input
             type="hidden"
             {...register('gender', { required: t('profile.genderRequired') })}
           />
-
           {errors.gender && (
-            <span className="text-xs text-red-500 mt-2 block animate-wiggle">
-              {errors.gender.message}
-            </span>
+            <p className="text-xs text-red-500 mt-3 flex items-center gap-1.5 animate-wiggle">
+              <span>⚠️</span>
+              <span>{errors.gender.message}</span>
+            </p>
           )}
-        </div>
+        </SectionCard>
 
-        {/* Activity Level */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-3 card-hover">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>🏃</span> {t('profile.activitySection')}
-          </h2>
-
+        {/* ===== Activity Level ===== */}
+        <SectionCard
+          Icon={Activity}
+          title={t('profile.activitySection')}
+          gradient="from-cyan-500 to-blue-500"
+          delay="delay-3"
+        >
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {ACTIVITY_LEVELS.map((level) => (
-              <button
-                key={level.value}
-                type="button"
-                onClick={() =>
-                  setValue('activityLevel', level.value, { shouldValidate: true })
-                }
-                className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 hover:scale-105 ${
-                  activityLevel === level.value
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-                }`}
-              >
-                <span className="text-xl">{level.emoji}</span>
-                <span className="text-xs font-medium text-center">
-                  {t(level.labelKey as never)}
-                </span>
-              </button>
-            ))}
+            {ACTIVITY_LEVELS.map((level) => {
+              const LevelIcon = level.Icon;
+              return (
+                <SelectTile
+                  key={level.value}
+                  Icon={LevelIcon}
+                  label={t(level.labelKey as never)}
+                  isActive={activityLevel === level.value}
+                  gradient={level.gradient}
+                  onClick={() =>
+                    setValue('activityLevel', level.value, { shouldValidate: true })
+                  }
+                  compact
+                />
+              );
+            })}
           </div>
-
           <input
             type="hidden"
             {...register('activityLevel', { required: t('profile.activityRequired') })}
           />
-
           {errors.activityLevel && (
-            <span className="text-xs text-red-500 mt-2 block animate-wiggle">
-              {errors.activityLevel.message}
-            </span>
+            <p className="text-xs text-red-500 mt-3 flex items-center gap-1.5 animate-wiggle">
+              <span>⚠️</span>
+              <span>{errors.activityLevel.message}</span>
+            </p>
           )}
-        </div>
+        </SectionCard>
 
-        {/* Goal */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-4 animate-fade-in-up delay-4 card-hover">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>🎯</span> {t('profile.goalSection')}
-          </h2>
-
+        {/* ===== Goal ===== */}
+        <SectionCard
+          Icon={Target}
+          title={t('profile.goalSection')}
+          gradient="from-pink-500 to-rose-500"
+          delay="delay-4"
+        >
           <div className="grid grid-cols-3 gap-3">
-            {GOALS.map((g) => (
-              <button
-                key={g.value}
-                type="button"
-                onClick={() => setValue('goal', g.value, { shouldValidate: true })}
-                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 hover:scale-105 ${
-                  goal === g.value
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-                }`}
-              >
-                <span className="text-2xl">{g.emoji}</span>
-                <span className="text-sm font-medium text-center">
-                  {t(g.labelKey as never)}
-                </span>
-              </button>
-            ))}
+            {GOALS.map((g) => {
+              const GoalIcon = g.Icon;
+              return (
+                <SelectTile
+                  key={g.value}
+                  Icon={GoalIcon}
+                  label={t(g.labelKey as never)}
+                  isActive={goal === g.value}
+                  gradient={g.gradient}
+                  onClick={() => setValue('goal', g.value, { shouldValidate: true })}
+                />
+              );
+            })}
           </div>
-
-          <input
-            type="hidden"
-            {...register('goal', { required: t('profile.goalRequired') })}
-          />
-
+          <input type="hidden" {...register('goal', { required: t('profile.goalRequired') })} />
           {errors.goal && (
-            <span className="text-xs text-red-500 mt-2 block animate-wiggle">
-              {errors.goal.message}
-            </span>
+            <p className="text-xs text-red-500 mt-3 flex items-center gap-1.5 animate-wiggle">
+              <span>⚠️</span>
+              <span>{errors.goal.message}</span>
+            </p>
           )}
-        </div>
+        </SectionCard>
 
-        {/* Feedback */}
+        {/* ===== Feedback ===== */}
         {mutation.isSuccess && (
-          <div className="mb-4 flex items-center gap-2 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm animate-bounce-in">
-            <span className="text-lg">✅</span>
-            <span>{t('profile.saveSuccess')}</span>
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 animate-bounce-in">
+            <span className="text-2xl">✅</span>
+            <span className="font-semibold">{t('profile.saveSuccess')}</span>
           </div>
         )}
         {mutation.isError && (
-          <div className="mb-4 flex items-center gap-2 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm animate-wiggle">
-            <span className="text-lg">⚠️</span>
-            <span>{t('profile.saveError')}</span>
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300 animate-wiggle">
+            <span className="text-2xl">⚠️</span>
+            <span className="font-semibold">{t('profile.saveError')}</span>
           </div>
         )}
 
-        {/* Submit */}
+        {/* ===== Submit ===== */}
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full h-14 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] animate-fade-in-up delay-5"
+          className="btn-shine w-full h-14 rounded-2xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-bold shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] flex items-center justify-center gap-2 animate-fade-in-up delay-5"
         >
-          {mutation.isPending
-            ? t('common.saving')
-            : `💾 ${t('profile.saveButton')}`}
+          <Save size={22} strokeWidth={2.5} />
+          {mutation.isPending ? t('common.saving') : t('profile.saveButton')}
         </button>
       </form>
     </div>
+  );
+}
+
+// ==================== Sub Components ====================
+
+function SectionCard({
+  Icon,
+  title,
+  gradient,
+  delay,
+  children,
+}: {
+  Icon: typeof User;
+  title: string;
+  gradient: string;
+  delay: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`group relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-soft animate-fade-in-up ${delay} card-hover`}
+    >
+      <div
+        className={`absolute -top-20 -end-20 w-64 h-64 rounded-full bg-gradient-to-br ${gradient} opacity-[0.05] group-hover:opacity-[0.1] blur-3xl transition-opacity pointer-events-none`}
+      />
+
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-5">
+          <div
+            className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}
+          >
+            <Icon size={22} strokeWidth={2.2} />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            {title}
+          </h2>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FieldInput({
+  label,
+  placeholder,
+  step,
+  error,
+  register,
+}: {
+  label: string;
+  placeholder?: string;
+  step?: string;
+  error?: string;
+  register: ReturnType<ReturnType<typeof useForm>['register']>;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+        {label}
+      </label>
+      <input
+        type="number"
+        step={step}
+        placeholder={placeholder}
+        {...register}
+        className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-emerald-500/10"
+      />
+      {error && (
+        <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1">
+          <span>⚠️</span>
+          <span>{error}</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SelectTile({
+  Icon,
+  label,
+  isActive,
+  gradient,
+  onClick,
+  compact = false,
+}: {
+  Icon: typeof User;
+  label: string;
+  isActive: boolean;
+  gradient: string;
+  onClick: () => void;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative overflow-hidden rounded-2xl transition-all ${
+        compact ? 'p-3' : 'p-4'
+      } flex flex-col items-center gap-1.5 ${
+        isActive
+          ? 'text-white shadow-lg scale-105'
+          : 'border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:scale-105'
+      }`}
+    >
+      {isActive && (
+        <>
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${gradient}`}
+          />
+          <div
+            className={`absolute -top-8 -end-8 w-20 h-20 rounded-full bg-white/20 blur-2xl pointer-events-none`}
+          />
+        </>
+      )}
+      <Icon
+        size={compact ? 20 : 22}
+        strokeWidth={2.5}
+        className="relative"
+      />
+      <span className={`relative font-semibold text-center ${compact ? 'text-[11px]' : 'text-xs'}`}>
+        {label}
+      </span>
+    </button>
   );
 }

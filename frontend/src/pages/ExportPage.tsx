@@ -1,44 +1,59 @@
 import { useState } from 'react';
+import {
+  Download,
+  Info,
+  Dumbbell,
+  Apple,
+  Scale,
+  Droplets,
+  Target,
+  Loader2,
+  FileSpreadsheet,
+} from 'lucide-react';
 import api from '../services/api';
 import { useTranslation } from '../i18n/useTranslation';
+
+// ==================== Exports Data ====================
 
 const EXPORTS = [
   {
     id: 'workouts',
     labelKey: 'export.workoutsLabel',
     descKey: 'export.workoutsDesc',
-    emoji: '🏋️',
-    color: 'blue',
+    Icon: Dumbbell,
+    gradient: 'from-blue-500 to-indigo-600',
   },
   {
     id: 'nutrition',
     labelKey: 'export.nutritionLabel',
     descKey: 'export.nutritionDesc',
-    emoji: '🍎',
-    color: 'emerald',
+    Icon: Apple,
+    gradient: 'from-emerald-500 to-green-600',
   },
   {
     id: 'weight',
     labelKey: 'export.weightLabel',
     descKey: 'export.weightDesc',
-    emoji: '⚖️',
-    color: 'purple',
+    Icon: Scale,
+    gradient: 'from-violet-500 to-purple-600',
   },
   {
     id: 'water',
     labelKey: 'export.waterLabel',
     descKey: 'export.waterDesc',
-    emoji: '💧',
-    color: 'cyan',
+    Icon: Droplets,
+    gradient: 'from-cyan-500 to-blue-600',
   },
   {
     id: 'goals',
     labelKey: 'export.goalsLabel',
     descKey: 'export.goalsDesc',
-    emoji: '🎯',
-    color: 'orange',
+    Icon: Target,
+    gradient: 'from-orange-500 to-rose-500',
   },
 ] as const;
+
+// ==================== Page ====================
 
 export default function ExportPage() {
   const { t } = useTranslation();
@@ -68,57 +83,73 @@ export default function ExportPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-6 animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {t('export.title')} 📥
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {t('export.subtitle')}
-        </p>
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* ===== Header ===== */}
+      <div className="flex items-center gap-4 animate-fade-in-up">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 blur-lg opacity-40" />
+          <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
+            <Download size={28} strokeWidth={2.2} />
+          </div>
+        </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            {t('export.title')}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {t('export.subtitle')}
+          </p>
+        </div>
       </div>
 
-      {/* Info Box */}
-      <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mb-6 animate-fade-in-up delay-1">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">💡</span>
-          <div className="text-sm text-blue-700 dark:text-blue-300">
-            <p className="font-medium mb-1">{t('export.infoTitle')}</p>
-            <p className="text-xs opacity-90">{t('export.infoDesc')}</p>
+      {/* ===== Info Box ===== */}
+      <div className="relative overflow-hidden rounded-3xl border border-sky-200/50 dark:border-sky-900/50 bg-gradient-to-br from-sky-50 via-cyan-50 to-indigo-50 dark:from-sky-950/30 dark:via-cyan-950/20 dark:to-indigo-950/30 p-5 shadow-soft animate-fade-in-up delay-1">
+        <div className="absolute -top-20 -end-20 w-64 h-64 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -start-20 w-64 h-64 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-start gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shrink-0">
+            <Info size={22} strokeWidth={2.2} />
+          </div>
+          <div className="flex-1">
+            <p className="font-bold text-slate-900 dark:text-white mb-1">
+              {t('export.infoTitle')}
+            </p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              {t('export.infoDesc')}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Export Cards */}
+      {/* ===== Export Cards ===== */}
       <div className="space-y-3">
         {EXPORTS.map((item, index) => {
           const label = t(item.labelKey as never);
+          const isDownloading = downloading === item.id;
+          const ItemIcon = item.Icon;
+
           return (
             <div
               key={item.id}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all animate-fade-in-up card-hover flex items-center justify-between gap-4"
+              className="group relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 shadow-soft hover:shadow-elevated transition-all animate-fade-in-up card-hover flex items-center justify-between gap-4"
               style={{ animationDelay: `${0.05 + index * 0.05}s` }}
             >
-              <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div
+                className={`absolute -top-16 -end-16 w-40 h-40 rounded-full bg-gradient-to-br ${item.gradient} opacity-[0.08] group-hover:opacity-[0.15] blur-3xl transition-opacity pointer-events-none`}
+              />
+
+              <div className="relative flex items-center gap-4 min-w-0 flex-1">
                 <div
-                  className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
-                    {
-                      blue: 'bg-blue-50 dark:bg-blue-900/30',
-                      emerald: 'bg-emerald-50 dark:bg-emerald-900/30',
-                      purple: 'bg-purple-50 dark:bg-purple-900/30',
-                      cyan: 'bg-cyan-50 dark:bg-cyan-900/30',
-                      orange: 'bg-orange-50 dark:bg-orange-900/30',
-                    }[item.color]
-                  }`}
+                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white shadow-lg shrink-0 group-hover:scale-110 transition-transform`}
                 >
-                  {item.emoji}
+                  <ItemIcon size={26} strokeWidth={2.2} />
                 </div>
                 <div className="min-w-0">
                   <p className="text-base font-bold text-slate-900 dark:text-white">
                     {label}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                     {t(item.descKey as never)}
                   </p>
                 </div>
@@ -126,35 +157,23 @@ export default function ExportPage() {
 
               <button
                 onClick={() => handleExport(item.id, label)}
-                disabled={downloading === item.id}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-sm font-medium shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 shrink-0"
+                disabled={isDownloading}
+                className={`btn-shine relative flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold shadow-lg transition-all shrink-0 ${
+                  isDownloading
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                    : `bg-gradient-to-l ${item.gradient} text-white hover:scale-105`
+                }`}
               >
-                {downloading === item.id ? (
+                {isDownloading ? (
                   <>
-                    <svg
-                      className="animate-spin w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                    <span>{t('export.downloading')}</span>
+                    <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
+                    <span className="hidden sm:inline">
+                      {t('export.downloading')}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <span>📥</span>
+                    <Download size={18} strokeWidth={2.5} />
                     <span>{t('export.download')}</span>
                   </>
                 )}
@@ -162,6 +181,12 @@ export default function ExportPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* ===== Footer Tip ===== */}
+      <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500 animate-fade-in-up delay-6">
+        <FileSpreadsheet size={14} strokeWidth={2.2} />
+        <p>CSV files are compatible with Excel, Google Sheets, and Numbers</p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Dumbbell } from 'lucide-react';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
 import InstallPWA from './components/InstallPWA';
@@ -32,8 +33,8 @@ function PageLoading() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-2xl animate-float">
-          💪
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white shadow-lg animate-float">
+          <Dumbbell size={24} strokeWidth={2.5} />
         </div>
         <div className="text-sm text-slate-500 dark:text-slate-400 animate-pulse-soft">
           Loading...

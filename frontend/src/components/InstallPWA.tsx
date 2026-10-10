@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Dumbbell, X } from 'lucide-react';
 import { useTranslation } from '../i18n/useTranslation';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -58,8 +59,8 @@ export default function InstallPWA() {
       dir="rtl"
     >
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 flex items-start gap-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-2xl shrink-0 animate-float">
-          💪
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white shrink-0 animate-float shadow-lg">
+          <Dumbbell size={24} strokeWidth={2.5} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -88,10 +89,10 @@ export default function InstallPWA() {
 
         <button
           onClick={handleDismiss}
-          className="w-6 h-6 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 text-xs shrink-0"
+          className="w-6 h-6 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0 transition-colors"
           aria-label={t('installPwa.close')}
         >
-          ✕
+          <X size={14} strokeWidth={2.5} />
         </button>
       </div>
     </div>

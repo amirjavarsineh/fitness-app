@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function FoodPicker({ value, onChange, onSelect, placeholder }: Props) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -36,6 +36,10 @@ export default function FoodPicker({ value, onChange, onSelect, placeholder }: P
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // اسم اصلی و فرعی بر اساس زبان فعلی
+  const primaryName = (food: FoodItem) => (language === 'fa' ? food.nameFa : food.name);
+  const secondaryName = (food: FoodItem) => (language === 'fa' ? food.name : food.nameFa);
+
   const filtered = (foods ?? []).filter((food) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
@@ -46,8 +50,9 @@ export default function FoodPicker({ value, onChange, onSelect, placeholder }: P
   });
 
   const handleSelect = (food: FoodItem) => {
-    onChange(food.nameFa);
-    setSearch(food.nameFa);
+    const name = primaryName(food);
+    onChange(name);
+    setSearch(name);
     onSelect(food);
     setOpen(false);
   };
@@ -88,10 +93,10 @@ export default function FoodPicker({ value, onChange, onSelect, placeholder }: P
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {food.nameFa}
+                      {primaryName(food)}
                     </p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 truncate">
-                      {food.name}
+                      {secondaryName(food)}
                       {food.brand && ` • ${food.brand}`}
                     </p>
                   </div>

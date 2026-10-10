@@ -1,18 +1,36 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { workoutService, type CreateWorkoutDto } from '../services/workout.service';
+import {
+  ArrowRight,
+  Save,
+  X,
+  Plus,
+  Check,
+  FileText,
+  Dumbbell,
+  Info,
+  Pencil,
+  Play,
+  Flame,
+  Sparkles,
+  Calendar,
+  Clock,
+} from 'lucide-react';
 import { useEffect } from 'react';
+import { workoutService, type CreateWorkoutDto } from '../services/workout.service';
 import ExercisePicker from '../components/ExercisePicker';
 import { useTranslation } from '../i18n/useTranslation';
 
+// ==================== Data ====================
+
 const WORKOUT_TYPES = [
-  { value: 'CARDIO', labelKey: 'workoutTypes.CARDIO', emoji: '🏃' },
-  { value: 'STRENGTH', labelKey: 'workoutTypes.STRENGTH', emoji: '💪' },
-  { value: 'FLEXIBILITY', labelKey: 'workoutTypes.FLEXIBILITY', emoji: '🤸' },
-  { value: 'HIIT', labelKey: 'workoutTypes.HIIT', emoji: '🔥' },
-  { value: 'YOGA', labelKey: 'workoutTypes.YOGA', emoji: '🧘' },
-  { value: 'OTHER', labelKey: 'workoutTypes.OTHER', emoji: '⭐' },
+  { value: 'CARDIO', labelKey: 'workoutTypes.CARDIO', Icon: Play, gradient: 'from-rose-500 to-orange-500' },
+  { value: 'STRENGTH', labelKey: 'workoutTypes.STRENGTH', Icon: Dumbbell, gradient: 'from-blue-500 to-indigo-600' },
+  { value: 'FLEXIBILITY', labelKey: 'workoutTypes.FLEXIBILITY', Icon: Sparkles, gradient: 'from-emerald-500 to-teal-500' },
+  { value: 'HIIT', labelKey: 'workoutTypes.HIIT', Icon: Flame, gradient: 'from-orange-500 to-red-600' },
+  { value: 'YOGA', labelKey: 'workoutTypes.YOGA', Icon: Sparkles, gradient: 'from-purple-500 to-pink-500' },
+  { value: 'OTHER', labelKey: 'workoutTypes.OTHER', Icon: Dumbbell, gradient: 'from-slate-500 to-slate-700' },
 ] as const;
 
 // تاریخ امروز به فرمت YYYY-MM-DD بر اساس timezone کاربر
@@ -24,7 +42,6 @@ function todayLocalISO(): string {
   return `${y}-${m}-${day}`;
 }
 
-// تبدیل تاریخ دریافتی از سرور به فرمت input type="date"
 function toDateInputValue(dateStr: string): string {
   const d = new Date(dateStr);
   const y = d.getFullYear();
@@ -32,6 +49,8 @@ function toDateInputValue(dateStr: string): string {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+// ==================== Page ====================
 
 export default function WorkoutFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -102,368 +121,423 @@ export default function WorkoutFormPage() {
 
   if (isEdit && isLoading) {
     return (
-      <div className="max-w-3xl mx-auto">
-        <p className="text-slate-400 dark:text-slate-500 animate-pulse-soft">
-          {t('common.loading')}
-        </p>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="h-32 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse-soft" />
+        <div className="h-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse-soft" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-6 animate-fade-in-up">
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* ===== Header ===== */}
+      <div className="animate-fade-in-up">
         <button
           onClick={() => navigate('/workouts')}
-          className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-3 flex items-center gap-1 transition-all hover:translate-x-[-3px] rtl:hover:translate-x-[-3px] ltr:hover:translate-x-[3px]"
+          className="group inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-4 transition-all"
         >
-          <span className="rtl:rotate-0 ltr:rotate-180">→</span>
-          <span>{t('workouts.backToWorkouts')}</span>
+          <span className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 flex items-center justify-center transition-colors rtl:rotate-0 ltr:rotate-180">
+            <ArrowRight size={16} strokeWidth={2.5} />
+          </span>
+          <span className="font-semibold">{t('workouts.backToWorkouts')}</span>
         </button>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          {isEdit ? t('workouts.formEditTitle') : t('workouts.formTitle')}
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {isEdit ? t('workouts.formEditDesc') : t('workouts.formNewDesc')}
-        </p>
+
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 blur-lg opacity-40" />
+            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
+              {isEdit ? <Pencil size={26} strokeWidth={2.2} /> : <Dumbbell size={26} strokeWidth={2.2} />}
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {isEdit ? t('workouts.formEditTitle') : t('workouts.formTitle')}
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              {isEdit ? t('workouts.formEditDesc') : t('workouts.formNewDesc')}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
-        {/* Basic Info */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-1 card-hover">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <span>📝</span> {t('workouts.basicInfo')}
-          </h2>
+      <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+        {/* ===== Basic Info ===== */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-soft animate-fade-in-up delay-1 card-hover">
+          <div className="absolute -top-20 -end-20 w-64 h-64 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
 
-          <div className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('workouts.workoutName')}
-              </label>
-              <input
-                type="text"
-                {...register('name')}
-                placeholder={t('workouts.workoutNamePlaceholder')}
-                className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('workouts.description')}
-              </label>
-              <textarea
-                rows={2}
-                {...register('description')}
-                placeholder={t('workouts.descriptionPlaceholder')}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none"
-              />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                {t('workouts.workoutType')} *
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {WORKOUT_TYPES.map((type) => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() =>
-                      setValue('type', type.value, { shouldValidate: true })
-                    }
-                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 hover:scale-105 ${
-                      selectedType === type.value
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-                    }`}
-                  >
-                    <span className="text-xl">{type.emoji}</span>
-                    <span className="text-xs font-medium">
-                      {t(type.labelKey as never)}
-                    </span>
-                  </button>
-                ))}
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-lg">
+                <FileText size={22} strokeWidth={2.2} />
               </div>
-              <input
-                type="hidden"
-                {...register('type', {
-                  required: t('workouts.workoutType') + ' ' + t('common.required'),
-                })}
-              />
-              {errors.type && (
-                <span className="text-xs text-red-500 mt-1 block animate-wiggle">
-                  {errors.type.message}
-                </span>
-              )}
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                {t('workouts.basicInfo')}
+              </h2>
             </div>
 
-            {/* Duration + Date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t('workouts.duration')} *
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('workouts.workoutName')}
                 </label>
                 <input
-                  type="number"
-                  min={1}
-                  {...register('duration', {
-                    required: t('workouts.durationError'),
-                    valueAsNumber: true,
-                    min: { value: 1, message: t('workouts.durationMin') },
-                  })}
-                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  type="text"
+                  {...register('name')}
+                  placeholder={t('workouts.workoutNamePlaceholder')}
+                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
                 />
-                {errors.duration && (
-                  <span className="text-xs text-red-500 mt-1 block animate-wiggle">
-                    {errors.duration.message}
-                  </span>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('workouts.description')}
+                </label>
+                <textarea
+                  rows={2}
+                  {...register('description')}
+                  placeholder={t('workouts.descriptionPlaceholder')}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10 resize-none"
+                />
+              </div>
+
+              {/* Type */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('workouts.workoutType')} *
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {WORKOUT_TYPES.map((type) => {
+                    const isActive = selectedType === type.value;
+                    const TypeIcon = type.Icon;
+                    return (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() =>
+                          setValue('type', type.value, { shouldValidate: true })
+                        }
+                        className={`relative overflow-hidden p-3 rounded-2xl transition-all flex flex-col items-center gap-1 ${
+                          isActive
+                            ? 'text-white shadow-lg scale-105'
+                            : 'border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:scale-105'
+                        }`}
+                      >
+                        {isActive && (
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-br ${type.gradient}`}
+                          />
+                        )}
+                        <TypeIcon size={20} strokeWidth={2.5} className="relative" />
+                        <span className="relative text-[11px] font-semibold text-center">
+                          {t(type.labelKey as never)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <input
+                  type="hidden"
+                  {...register('type', {
+                    required: t('workouts.workoutType') + ' ' + t('common.required'),
+                  })}
+                />
+                {errors.type && (
+                  <p className="text-xs text-red-500 mt-2 flex items-center gap-1.5 animate-wiggle">
+                    <X size={14} strokeWidth={2.5} />
+                    <span>{errors.type.message}</span>
+                  </p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t('workouts.dateLabel')}
-                </label>
-                <input
-                  type="date"
-                  {...register('date')}
-                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                />
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                  {t('workouts.dateHint')}
-                </p>
-              </div>
-            </div>
-
-            {/* Template Checkbox */}
-            <div
-              className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                isTemplate
-                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
-              }`}
-              onClick={() => setValue('isTemplate', !isTemplate)}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
-                    isTemplate
-                      ? 'bg-purple-500 border-purple-500'
-                      : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
-                  }`}
-                >
-                  {isTemplate && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
+              {/* Duration + Date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock size={14} strokeWidth={2.5} />
+                      {t('workouts.duration')} *
+                    </span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    {...register('duration', {
+                      required: t('workouts.durationError'),
+                      valueAsNumber: true,
+                      min: { value: 1, message: t('workouts.durationMin') },
+                    })}
+                    className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                  {errors.duration && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <X size={12} strokeWidth={2.5} />
+                      <span>{errors.duration.message}</span>
+                    </p>
                   )}
                 </div>
-                <input type="hidden" {...register('isTemplate')} />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>📋</span>
-                    <span>{t('workouts.templateLabel')}</span>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar size={14} strokeWidth={2.5} />
+                      {t('workouts.dateLabel')}
+                    </span>
+                  </label>
+                  <input
+                    type="date"
+                    {...register('date')}
+                    className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    {t('workouts.dateHint')}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {t('workouts.templateDesc')}
-                  </p>
+                </div>
+              </div>
+
+              {/* Template Toggle */}
+              <div
+                className={`relative overflow-hidden p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                  isTemplate
+                    ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-300 dark:hover:border-purple-700'
+                }`}
+                onClick={() => setValue('isTemplate', !isTemplate)}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                      isTemplate
+                        ? 'bg-gradient-to-br from-purple-500 to-fuchsia-500 border-transparent text-white'
+                        : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                    }`}
+                  >
+                    {isTemplate && <Check size={14} strokeWidth={3} />}
+                  </div>
+                  <input type="hidden" {...register('isTemplate')} />
+
+                  <div className="flex-1 flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                        isTemplate
+                          ? 'bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-lg'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      <FileText size={20} strokeWidth={2.2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        {t('workouts.templateLabel')}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {t('workouts.templateDesc')}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Exercises */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-fade-in-up delay-2 card-hover">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>🏋️</span> {t('workouts.exercises')}
-              <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full">
-                {fields.length}
-              </span>
-            </h2>
-            <button
-              type="button"
-              onClick={() =>
-                append({
-                  name: '',
-                  sets: 3,
-                  reps: 10,
-                  weight: null,
-                  duration: null,
-                  restTime: 60,
-                  order: fields.length,
-                })
-              }
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all hover:scale-105"
-            >
-              + {t('workouts.addExercise')}
-            </button>
-          </div>
+        {/* ===== Exercises ===== */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-soft animate-fade-in-up delay-2 card-hover">
+          <div className="absolute -top-20 -end-20 w-64 h-64 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
 
-          <div className="space-y-3">
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 animate-fade-in"
-                style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
-              >
-                {/* Exercise Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {t('workouts.exerciseN')} {index + 1}
-                    </span>
-                  </div>
-                  {fields.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 text-sm transition-all hover:scale-110"
-                      title={t('common.delete')}
-                    >
-                      ✕
-                    </button>
-                  )}
+          <div className="relative">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
+                  <Dumbbell size={22} strokeWidth={2.2} />
                 </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    {t('workouts.exercises')}
+                    <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold">
+                      {fields.length}
+                    </span>
+                  </h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  append({
+                    name: '',
+                    sets: 3,
+                    reps: 10,
+                    weight: null,
+                    duration: null,
+                    restTime: 60,
+                    order: fields.length,
+                  })
+                }
+                className="btn-shine flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-l from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white text-sm font-bold transition-all hover:scale-105 shadow-lg shadow-indigo-500/20"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">{t('workouts.addExercise')}</span>
+              </button>
+            </div>
 
-                {/* Exercise Fields */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  <div className="col-span-2 md:col-span-1">
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      {t('workouts.exerciseName')} *
-                    </label>
-                    <Controller
-                      control={control}
-                      name={`exercises.${index}.name`}
-                      rules={{ required: t('workouts.requiredShort') }}
-                      render={({ field }) => (
-                        <ExercisePicker
-                          value={field.value ?? ''}
-                          onChange={field.onChange}
-                          placeholder={t('workouts.exerciseNamePlaceholder')}
-                        />
-                      )}
-                    />
-                    {errors.exercises?.[index]?.name && (
-                      <span className="text-xs text-red-500 mt-0.5 block animate-wiggle">
-                        {errors.exercises[index]?.name?.message}
+            <div className="space-y-3">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800 dark:to-slate-800/50 border border-slate-100 dark:border-slate-700 animate-fade-in"
+                  style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                        {index + 1}
+                      </div>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        {t('workouts.exerciseN')} {index + 1}
                       </span>
+                    </div>
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 transition-all hover:scale-110 flex items-center justify-center shadow-sm"
+                        title={t('common.delete')}
+                      >
+                        <X size={16} strokeWidth={2.5} />
+                      </button>
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      {t('workouts.sets')}
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      {...register(`exercises.${index}.sets`, {
-                        valueAsNumber: true,
-                      })}
-                      className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        {t('workouts.exerciseName')} *
+                      </label>
+                      <Controller
+                        control={control}
+                        name={`exercises.${index}.name`}
+                        rules={{ required: t('workouts.requiredShort') }}
+                        render={({ field }) => (
+                          <ExercisePicker
+                            value={field.value ?? ''}
+                            onChange={field.onChange}
+                            placeholder={t('workouts.exerciseNamePlaceholder')}
+                          />
+                        )}
+                      />
+                      {errors.exercises?.[index]?.name && (
+                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                          <X size={12} strokeWidth={2.5} />
+                          <span>{errors.exercises[index]?.name?.message}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        {t('workouts.sets')}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        {...register(`exercises.${index}.sets`, {
+                          valueAsNumber: true,
+                        })}
+                        className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        {t('workouts.reps')}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        {...register(`exercises.${index}.reps`, {
+                          valueAsNumber: true,
+                        })}
+                        className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        {t('workouts.weightKg')}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        {...register(`exercises.${index}.weight`, {
+                          setValueAs: (v) => (v === '' ? null : Number(v)),
+                        })}
+                        placeholder={t('common.optional')}
+                        className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        {t('workouts.restTime')}
+                      </label>
+                      <input
+                        type="number"
+                        {...register(`exercises.${index}.restTime`, {
+                          setValueAs: (v) => (v === '' ? null : Number(v)),
+                        })}
+                        className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      {t('workouts.reps')}
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      {...register(`exercises.${index}.reps`, {
-                        valueAsNumber: true,
-                      })}
-                      className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      {t('workouts.weightKg')}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      {...register(`exercises.${index}.weight`, {
-                        setValueAs: (v) => (v === '' ? null : Number(v)),
-                      })}
-                      placeholder={t('common.optional')}
-                      className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      {t('workouts.restTime')}
-                    </label>
-                    <input
-                      type="number"
-                      {...register(`exercises.${index}.restTime`, {
-                        setValueAs: (v) => (v === '' ? null : Number(v)),
-                      })}
-                      className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
+                  <input
+                    type="hidden"
+                    {...register(`exercises.${index}.order`)}
+                    value={index}
+                  />
                 </div>
+              ))}
+            </div>
 
-                <input
-                  type="hidden"
-                  {...register(`exercises.${index}.order`)}
-                  value={index}
-                />
-              </div>
-            ))}
+            <div className="mt-5 flex items-start gap-2.5 p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 text-indigo-700 dark:text-indigo-300 text-xs">
+              <Info size={16} strokeWidth={2.5} className="shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                {t('workouts.exerciseNamePlaceholder')}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Error */}
+        {/* ===== Error ===== */}
         {mutation.isError && (
-          <div className="flex items-center gap-2 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm animate-wiggle">
-            <span className="text-lg">⚠️</span>
-            <span>{t('workouts.workoutError')}</span>
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300 animate-wiggle">
+            <X size={22} strokeWidth={2.5} />
+            <span className="font-semibold">{t('workouts.workoutError')}</span>
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-3">
+        {/* ===== Actions ===== */}
+        <div className="flex gap-3 animate-fade-in-up delay-3">
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="flex-1 h-14 rounded-xl bg-gradient-to-l from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02]"
+            className="btn-shine flex-1 h-14 rounded-2xl bg-gradient-to-l from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] flex items-center justify-center gap-2"
           >
+            <Save size={20} strokeWidth={2.5} />
             {mutation.isPending
               ? t('common.saving')
               : isEdit
-              ? '💾 ' + t('workouts.saveChanges')
-              : '✅ ' + t('workouts.createWorkout')}
+              ? t('workouts.saveChanges')
+              : t('workouts.createWorkout')}
           </button>
           <button
             type="button"
             onClick={() => navigate('/workouts')}
-            className="px-6 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-all hover:scale-105"
+            className="px-6 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-all hover:scale-105 flex items-center gap-2"
           >
-            {t('common.cancel')}
+            <X size={20} strokeWidth={2.5} />
+            <span className="hidden sm:inline">{t('common.cancel')}</span>
           </button>
         </div>
       </form>
