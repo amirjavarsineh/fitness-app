@@ -151,38 +151,6 @@
 | Recharts | Charts |
 | vite-plugin-pwa | PWA Support |
 
-### 📁 ساختار پروژه
-
-```
-fitness-app/
-├── backend/                        # سرور (Node.js + Express)
-│   ├── prisma/
-│   │   ├── schema.prisma           # ۱۶ مدل دیتابیس
-│   │   ├── migrations/             # Migration ها
-│   │   └── seed.ts                 # دیتای اولیه (تمرینات، غذاها)
-│   ├── src/
-│   │   ├── controllers/            # ۱۹ کنترلر
-│   │   ├── routes/                 # ۱۹ مسیر API
-│   │   ├── services/               # منطق تجاری
-│   │   ├── middlewares/            # Auth + Error Handler
-│   │   └── lib/                    # ابزارها (Prisma, Dates)
-│   ├── .env.example
-│   └── package.json
-│
-└── frontend/                       # کلاینت (React + Vite)
-    ├── public/
-    │   └── icons/                  # آیکون‌های PWA
-    ├── src/
-    │   ├── pages/                  # ۱۹ صفحه
-    │   ├── components/             # کامپوننت‌های قابل استفاده
-    │   ├── services/               # ۱۷ سرویس API
-    │   ├── store/                  # ۳ استور Zustand
-    │   ├── i18n/                   # ترجمه‌های فارسی/انگلیسی
-    │   ├── utils/                  # ابزارها
-    │   └── types/                  # Type های مشترک
-    ├── .env.example
-    └── package.json
-```
 
 ### 🚀 راه‌اندازی
 
@@ -691,38 +659,7 @@ npx prisma generate
 | Recharts | Charts |
 | vite-plugin-pwa | PWA Support |
 
-### 📁 Project Structure
 
-```
-fitness-app/
-├── backend/                        # Server (Node.js + Express)
-│   ├── prisma/
-│   │   ├── schema.prisma           # 16 database models
-│   │   ├── migrations/
-│   │   └── seed.ts                 # Seed data (exercises, foods)
-│   ├── src/
-│   │   ├── controllers/            # 19 controllers
-│   │   ├── routes/                 # 19 API routes
-│   │   ├── services/               # Business logic
-│   │   ├── middlewares/            # Auth + Error Handler
-│   │   └── lib/                    # Utils (Prisma, Dates)
-│   ├── .env.example
-│   └── package.json
-│
-└── frontend/                       # Client (React + Vite)
-    ├── public/
-    │   └── icons/                  # PWA icons
-    ├── src/
-    │   ├── pages/                  # 19 pages
-    │   ├── components/             # Reusable components
-    │   ├── services/               # 17 API services
-    │   ├── store/                  # 3 Zustand stores
-    │   ├── i18n/                   # FA/EN translations
-    │   ├── utils/                  # Utilities
-    │   └── types/                  # Shared types
-    ├── .env.example
-    └── package.json
-```
 
 ### 🚀 Getting Started
 
