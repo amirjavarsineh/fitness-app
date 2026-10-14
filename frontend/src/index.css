@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
 /* فعال کردن Dark Mode با کلاس .dark */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -14,8 +13,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Vazirmatn', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-feature-settings: 'ss01', 'ss02';
-  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss02';
+  font-variant-numeric: normal;  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f1f5f9;
   transition: background-color 0.3s ease, color 0.3s ease;

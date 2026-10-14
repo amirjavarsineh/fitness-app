@@ -80,8 +80,9 @@ export default function WaterPage() {
   });
 
   const locale = language === 'fa' ? 'fa-IR' : 'en-US';
-  const fmt = (n: number): string => n.toLocaleString(locale);
-
+const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+const fmt = (n: number): string =>
+  new Intl.NumberFormat(locale, { numberingSystem }).format(n);
   if (todayLoading) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">

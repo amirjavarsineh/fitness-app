@@ -125,8 +125,9 @@ export default function DashboardPage() {
       : t('dashboard.goodEvening');
 
   const locale = language === 'fa' ? 'fa-IR' : 'en-US';
-  const fmt = (n: number): string => n.toLocaleString(locale);
-
+  const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+  const fmt = (n: number): string =>
+  new Intl.NumberFormat(locale, { numberingSystem }).format(n);
   const fmtDayMonth = (iso: string) =>
     new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 

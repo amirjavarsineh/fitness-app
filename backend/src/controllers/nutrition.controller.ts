@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { toTehranDateKey, startOfDayTehran } from '../lib/dates';
 
 export const createNutritionLog = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -35,17 +36,21 @@ export const getNutritionLogs = async (req: AuthRequest, res: Response): Promise
     const userId = req.userId!;
     const { date } = req.query;
 
-    const where: { userId: string; createdAt?: { gte: Date; lt: Date } } = { userId };
+    // اگه کاربر تاریخی نفرستاد، امروز به وقت تهران رو استفاده کن
+    const dateKey =
+      date && typeof date === 'string'
+        ? toTehranDateKey(new Date(date))
+        : toTehranDateKey(new Date());
 
-    if (date && typeof date === 'string') {
-      const day = new Date(date);
-      const next = new Date(day);
-      next.setDate(next.getDate() + 1);
-      where.createdAt = { gte: day, lt: next };
-    }
+    const dayStart = startOfDayTehran(dateKey);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
 
     const logs = await prisma.nutritionLog.findMany({
-      where,
+      where: {
+        userId,
+        createdAt: { gte: dayStart, lt: dayEnd },
+      },
       orderBy: { createdAt: 'desc' },
     });
 

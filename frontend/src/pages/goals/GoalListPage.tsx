@@ -62,8 +62,9 @@ export default function GoalListPage() {
   const [error, setError] = useState('');
 
   const locale = language === 'fa' ? 'fa-IR' : 'en-US';
-  const fmt = (n: number): string => n.toLocaleString(locale);
-
+const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+const fmt = (n: number): string =>
+  new Intl.NumberFormat(locale, { numberingSystem }).format(n);
   const fetchGoals = async () => {
     try {
       const data = await goalService.getAll();

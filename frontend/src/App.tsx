@@ -5,6 +5,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/Layout/AppLayout';
 import InstallPWA from './components/InstallPWA';
 import ReminderNotifier from './components/ReminderNotifier';
+import { useTranslation } from './i18n/useTranslation';
+
+
 
 // ===== Lazy loading صفحات =====
 // هر صفحه فقط وقتی لود می‌شه که کاربر بهش بره
@@ -28,8 +31,10 @@ const PredictionPage = lazy(() => import('./pages/PredictionPage'));
 const GoalListPage = lazy(() => import('./pages/goals/GoalListPage'));
 const GoalFormPage = lazy(() => import('./pages/goals/GoalFormPage'));
 
+
 // صفحه‌ی لودینگ که موقع انتظار نشون داده می‌شه
 function PageLoading() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
@@ -37,7 +42,7 @@ function PageLoading() {
           <Dumbbell size={24} strokeWidth={2.5} />
         </div>
         <div className="text-sm text-slate-500 dark:text-slate-400 animate-pulse-soft">
-          Loading...
+          {t('common.loading')}
         </div>
       </div>
     </div>

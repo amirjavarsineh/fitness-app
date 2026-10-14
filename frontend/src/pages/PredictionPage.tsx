@@ -30,8 +30,9 @@ export default function PredictionPage() {
   });
 
   const locale = language === 'fa' ? 'fa-IR' : 'en-US';
-  const fmt = (n: number): string => n.toLocaleString(locale);
-
+const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+const fmt = (n: number): string =>
+  new Intl.NumberFormat(locale, { numberingSystem }).format(n);
   const formatDate = (iso: string | null): string => {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString(locale, {

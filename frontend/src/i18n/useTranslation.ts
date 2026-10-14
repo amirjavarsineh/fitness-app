@@ -30,14 +30,35 @@ export function useTranslation() {
     return typeof value === 'string' ? value : path;
   };
 
+  // ===== اعداد رو با فرمت درست نشون بده =====
+  const fmt = (n: number): string => {
+    const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+    const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+    return new Intl.NumberFormat(locale, { numberingSystem }).format(n);
+  };
+
+  // ===== تاریخ رو هم با فرمت درست نشون بده =====
+  const fmtDate = (
+    d: Date | string,
+    options?: Intl.DateTimeFormatOptions
+  ): string => {
+    const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+    const numberingSystem = language === 'fa' ? 'arabext' : 'latn';
+    return new Intl.DateTimeFormat(locale, {
+      ...options,
+      numberingSystem,
+    }).format(new Date(d));
+  };
+
   return {
     t,
     language,
     isRTL: language === 'fa',
+    fmt,
+    fmtDate,
     setLanguage: useLanguageStore.getState().set,
     toggleLanguage: useLanguageStore.getState().toggle,
   };
 }
 
-// Alias for convenience
 export type LanguageType = Language;
