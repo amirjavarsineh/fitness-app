@@ -30,6 +30,7 @@ const LevelPage = lazy(() => import('./pages/LevelPage'));
 const PredictionPage = lazy(() => import('./pages/PredictionPage'));
 const GoalListPage = lazy(() => import('./pages/goals/GoalListPage'));
 const GoalFormPage = lazy(() => import('./pages/goals/GoalFormPage'));
+const InstallAppPage = lazy(() => import('./pages/InstallAppPage'));
 
 
 // صفحه‌ی لودینگ که موقع انتظار نشون داده می‌شه
@@ -79,6 +80,7 @@ export default function App() {
               <Route path="/report" element={<ReportPage />} />
               <Route path="/export" element={<ExportPage />} />
               <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/install" element={<InstallAppPage />} />
 
               <Route path="/goals" element={<GoalListPage />} />
               <Route path="/goals/new" element={<GoalFormPage />} />

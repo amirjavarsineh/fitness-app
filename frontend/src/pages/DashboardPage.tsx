@@ -27,6 +27,7 @@ import {
 import api from '../services/api';
 import { useAuthStore } from '../store/auth.store';
 import { useTranslation } from '../i18n/useTranslation';
+import InstallAppCard from '../components/InstallAppCard';
 
 interface StatsResponse {
   success: boolean;
@@ -197,6 +198,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      {/* ===== Install App Card ===== */}
+      <InstallAppCard />
 
       {/* ===== Stat Cards ===== */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

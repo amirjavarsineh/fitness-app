@@ -24,16 +24,28 @@ export default defineConfig({
         dir: 'rtl',
         icons: [
           {
-            src: '/icons/icon.svg',
+            src: '/icons/icon-192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
+            type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: '/icons/icon.svg',
+            src: '/icons/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/icons/icon-512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
         categories: ['fitness', 'health', 'lifestyle'],
@@ -45,7 +57,7 @@ export default defineConfig({
         skipWaiting: true,
       },
       devOptions: {
-        enabled: false,
+        enabled: true,
       },
     }),
   ],
