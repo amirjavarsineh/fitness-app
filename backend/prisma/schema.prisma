@@ -74,6 +74,17 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  isCoach         Boolean        @default(false)
+  coachCode       String?        @unique
+  coachProfile    CoachProfile?
+  coachedStudents CoachStudent[] @relation("CoachRelation")
+  myCoaches       CoachStudent[] @relation("StudentRelation")
+
+  coachedPrograms  Program[]           @relation("CoachPrograms")
+  studentPrograms  ProgramAssignment[] @relation("StudentPrograms")
+  assignedByMe     ProgramAssignment[] @relation("AssignedBy")
+  progressLogs     ProgramProgress[]   @relation("StudentProgress")
+
   profile          Profile?
   mealLogs         MealLog[]
   workoutLogs      WorkoutLog[]
@@ -85,6 +96,139 @@ model User {
   bodyMeasurements BodyMeasurement[]
   reminders        Reminder[]
   challenges       Challenge[]
+}
+
+model CoachProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String?
+  bio         String?
+  specialty   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CoachStudent {
+  id        String   @id @default(cuid())
+  coachId   String
+  studentId String
+  coach     User     @relation("CoachRelation", fields: [coachId], references: [id], onDelete: Cascade)
+  student   User     @relation("StudentRelation", fields: [studentId], references: [id], onDelete: Cascade)
+  status    String   @default("ACTIVE")
+  joinedAt  DateTime @default(now())
+
+  @@unique([coachId, studentId])
+  @@index([coachId])
+  @@index([studentId])
+}
+
+model Program {
+  id            String   @id @default(cuid())
+  coachId       String
+  coach         User     @relation("CoachPrograms", fields: [coachId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  type          String   @default("WEEKLY")
+  durationWeeks Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  days        ProgramDay[]
+  assignments ProgramAssignment[]
+
+  @@index([coachId])
+}
+
+model ProgramDay {
+  id        String   @id @default(cuid())
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  dayNumber Int
+  label     String
+  notes     String?
+  order     Int      @default(0)
+
+  exercises ProgramExercise[]
+  progresses ProgramProgress[]
+
+  @@index([programId])
+}
+
+model ProgramExercise {
+  id       String     @id @default(cuid())
+  dayId    String
+  day      ProgramDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  name     String
+  sets     Int?
+  reps     Int?
+  weight   Float?
+  restTime Int?
+  notes    String?
+  order    Int        @default(0)
+
+  progressLogs ProgramProgressExercise[]
+
+  @@index([dayId])
+}
+
+model ProgramAssignment {
+  id        String   @id @default(cuid())
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User     @relation("StudentPrograms", fields: [studentId], references: [id], onDelete: Cascade)
+  coachId   String
+  coach     User     @relation("AssignedBy", fields: [coachId], references: [id], onDelete: Cascade)
+  status    String   @default("ACTIVE")
+  startDate DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  progresses ProgramProgress[]
+
+  @@index([studentId])
+  @@index([coachId])
+  @@index([programId])
+}
+
+model ProgramProgress {
+  id           String            @id @default(cuid())
+  assignmentId String
+  assignment   ProgramAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      User              @relation("StudentProgress", fields: [studentId], references: [id], onDelete: Cascade)
+  dayId        String
+  day          ProgramDay        @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  date         DateTime          @db.Date
+  status       String            @default("IN_PROGRESS")
+  completedAt  DateTime?
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  exercises ProgramProgressExercise[]
+
+  @@unique([assignmentId, dayId, date])
+  @@index([studentId])
+  @@index([assignmentId])
+  @@index([date])
+}
+
+model ProgramProgressExercise {
+  id           String          @id @default(cuid())
+  progressId   String
+  progress     ProgramProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exercise     ProgramExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  completed    Boolean         @default(false)
+  actualSets   Int?
+  actualReps   Int?
+  actualWeight Float?
+  timeSpent    Int?
+  notes        String?
+  order        Int             @default(0)
+
+  @@index([progressId])
 }
 
 model Profile {
@@ -212,6 +356,8 @@ model Workout {
   caloriesBurned Int?
   notes          String?
   isTemplate     Boolean     @default(false)
+  isCompleted    Boolean     @default(false)
+  completedAt    DateTime?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -276,11 +422,14 @@ model BodyMeasurement {
   forearm   Float?
   thigh     Float?
   calf      Float?
+  shoulder  Float?
+  wrist     Float?
   note      String?
   createdAt DateTime @default(now())
 
   @@unique([userId, date])
 }
+
 
 model Reminder {
   id        String   @id @default(cuid())

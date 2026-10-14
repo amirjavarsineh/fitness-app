@@ -1,12 +1,9 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { toTehranDateKey, startOfDayTehran, dateKeyToDbDate } from '../lib/dates';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
-function toDateKey(d: Date): string {
-  const date = new Date(d);
-  date.setHours(0, 0, 0, 0);
-  return date.toISOString().slice(0, 10);
-}
+
 
 function calculateStreaks(dateKeys: Set<string>): { current: number; best: number } {
   if (dateKeys.size === 0) return { current: 0, best: 0 };
@@ -14,14 +11,14 @@ function calculateStreaks(dateKeys: Set<string>): { current: number; best: numbe
   let current = 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayKey = toDateKey(today);
+  const todayKey = toTehranDateKey(today);
   const checkDate = new Date(today);
 
   if (!dateKeys.has(todayKey)) {
     checkDate.setDate(checkDate.getDate() - 1);
   }
 
-  while (dateKeys.has(toDateKey(checkDate))) {
+  while (dateKeys.has(toTehranDateKey(checkDate))) {
     current++;
     checkDate.setDate(checkDate.getDate() - 1);
   }
@@ -51,10 +48,20 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId!;
 
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const now = new Date();
+    const todayKey = toTehranDateKey(now);
+
+    // برای فیلدهای @db.Date (آب، وزن، اندازه)
+    const todayDate = dateKeyToDbDate(todayKey);
+
+    // برای فیلدهای createdAt (تغذیه، تمرین)
+    const todayStart = startOfDayTehran(todayKey);
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
     const weekStart = new Date(todayStart);
     weekStart.setDate(weekStart.getDate() - 6);
+
     const monthStart = new Date(todayStart);
     monthStart.setDate(monthStart.getDate() - 29);
 
@@ -76,9 +83,16 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
       weekWaterLogs,
       weekWorkouts,
     ] = await Promise.all([
-      prisma.workout.count({ where: { userId, isTemplate: false } }),
-      prisma.workout.count({
-        where: { userId, isTemplate: false, createdAt: { gte: weekStart } },
+            prisma.workout.count({
+        where: { userId, isTemplate: false, isCompleted: true },
+      }),
+            prisma.workout.count({
+        where: {
+          userId,
+          isTemplate: false,
+          isCompleted: true,
+          createdAt: { gte: weekStart },
+        },
       }),
       prisma.workout.findMany({
         where: { userId, isTemplate: false },
@@ -91,8 +105,11 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
           },
         },
       }),
-      prisma.nutritionLog.aggregate({
-        where: { userId, createdAt: { gte: todayStart } },
+            prisma.nutritionLog.aggregate({
+        where: {
+          userId,
+          createdAt: { gte: todayStart, lt: tomorrowStart },
+        },
         _sum: { calories: true, protein: true, carbs: true, fat: true },
       }),
       prisma.nutritionLog.aggregate({
@@ -112,8 +129,8 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
         },
       }),
       prisma.goal.count({ where: { userId, status: 'COMPLETED' } }),
-      prisma.waterLog.findUnique({
-        where: { userId_date: { userId, date: todayStart } },
+            prisma.waterLog.findUnique({
+        where: { userId_date: { userId, date: todayDate } },
       }),
       prisma.user.findUnique({
         where: { id: userId },
@@ -123,8 +140,8 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
         where: { userId },
         orderBy: { date: 'asc' },
       }),
-      prisma.workout.findMany({
-        where: { userId, isTemplate: false },
+            prisma.workout.findMany({
+        where: { userId, isTemplate: false, isCompleted: true },
         select: { date: true },
         orderBy: { date: 'desc' },
       }),
@@ -146,8 +163,13 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
         where: { userId, date: { gte: weekStart } },
         orderBy: { date: 'asc' },
       }),
-      prisma.workout.findMany({
-        where: { userId, isTemplate: false, date: { gte: weekStart } },
+            prisma.workout.findMany({
+        where: {
+          userId,
+          isTemplate: false,
+          isCompleted: true,
+          date: { gte: weekStart },
+        },
         select: { date: true, duration: true, caloriesBurned: true },
         orderBy: { date: 'asc' },
       }),
@@ -192,14 +214,14 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     }
 
     const workoutDateKeys = new Set(
-      allWorkoutDates.map((w) => toDateKey(w.date))
+      allWorkoutDates.map((w) => toTehranDateKey(w.date))
     );
     const waterMetDateKeys = new Set(
       allWaterLogs
         .filter((w) => w.amount >= DAILY_WATER_GOAL)
-        .map((w) => toDateKey(w.date))
+        .map((w) => toTehranDateKey(w.date))
     );
-    const weightDateKeys = new Set(weightLogs.map((w) => toDateKey(w.date)));
+    const weightDateKeys = new Set(weightLogs.map((w) => toTehranDateKey(w.date)));
 
     const workoutStreak = calculateStreaks(workoutDateKeys);
     const waterStreak = calculateStreaks(waterMetDateKeys);
@@ -211,7 +233,7 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
 
     // 1. Weight chart (last 30 days)
     const weightChart = monthWeights.map((w) => ({
-      date: toDateKey(new Date(w.date)),
+      date: toTehranDateKey(new Date(w.date)),
       weight: w.weight,
     }));
 
@@ -220,19 +242,19 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     for (let i = 6; i >= 0; i--) {
       const d = new Date(todayStart);
       d.setDate(d.getDate() - i);
-      const key = toDateKey(d);
+      const key = toTehranDateKey(d);
       calorieMap[key] = { consumed: 0, burned: 0 };
     }
 
     for (const log of weekNutritionLogs) {
-      const key = toDateKey(new Date(log.createdAt));
+      const key = toTehranDateKey(new Date(log.createdAt));
       if (calorieMap[key]) {
         calorieMap[key].consumed += log.calories;
       }
     }
 
     for (const w of weekWorkouts) {
-      const key = toDateKey(new Date(w.date));
+      const key = toTehranDateKey(new Date(w.date));
       if (calorieMap[key]) {
         calorieMap[key].burned += w.caloriesBurned ?? 0;
       }
@@ -249,11 +271,11 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     for (let i = 6; i >= 0; i--) {
       const d = new Date(todayStart);
       d.setDate(d.getDate() - i);
-      waterMap[toDateKey(d)] = 0;
+      waterMap[toTehranDateKey(d)] = 0;
     }
 
     for (const log of weekWaterLogs) {
-      const key = toDateKey(new Date(log.date));
+      const key = toTehranDateKey(new Date(log.date));
       if (waterMap[key] !== undefined) {
         waterMap[key] = log.amount;
       }
@@ -270,11 +292,11 @@ export const getStats = async (req: AuthRequest, res: Response): Promise<void> =
     for (let i = 6; i >= 0; i--) {
       const d = new Date(todayStart);
       d.setDate(d.getDate() - i);
-      workoutMap[toDateKey(d)] = { count: 0, duration: 0 };
+      workoutMap[toTehranDateKey(d)] = { count: 0, duration: 0 };
     }
 
     for (const w of weekWorkouts) {
-      const key = toDateKey(new Date(w.date));
+      const key = toTehranDateKey(new Date(w.date));
       if (workoutMap[key]) {
         workoutMap[key].count += 1;
         workoutMap[key].duration += w.duration;

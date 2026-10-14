@@ -31,10 +31,12 @@ const FIELDS: {
 }[] = [
   { key: 'neck', labelKey: 'measurements.neck', Icon: Ribbon, gradient: 'from-purple-500 to-fuchsia-500' },
   { key: 'chest', labelKey: 'measurements.chest', Icon: Heart, gradient: 'from-blue-500 to-indigo-500' },
+  { key: 'shoulder', labelKey: 'measurements.shoulder', Icon: Ruler, gradient: 'from-indigo-500 to-violet-500' },
   { key: 'waist', labelKey: 'measurements.waist', Icon: Ruler, gradient: 'from-orange-500 to-amber-500' },
   { key: 'hips', labelKey: 'measurements.hips', Icon: Circle, gradient: 'from-pink-500 to-rose-500' },
   { key: 'bicep', labelKey: 'measurements.bicep', Icon: Dumbbell, gradient: 'from-red-500 to-orange-500' },
   { key: 'forearm', labelKey: 'measurements.forearm', Icon: Zap, gradient: 'from-amber-500 to-yellow-500' },
+  { key: 'wrist', labelKey: 'measurements.wrist', Icon: Zap, gradient: 'from-fuchsia-500 to-pink-500' },
   { key: 'thigh', labelKey: 'measurements.thigh', Icon: Footprints, gradient: 'from-emerald-500 to-teal-500' },
   { key: 'calf', labelKey: 'measurements.calf', Icon: Footprints, gradient: 'from-cyan-500 to-blue-500' },
 ];
@@ -47,8 +49,8 @@ export default function MeasurementsPage() {
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState<Record<string, string>>({
-    neck: '', chest: '', waist: '', hips: '',
-    bicep: '', forearm: '', thigh: '', calf: '',
+    neck: '', chest: '', shoulder: '', waist: '', hips: '',
+    bicep: '', forearm: '', wrist: '', thigh: '', calf: '',
     note: '',
   });
 
@@ -68,8 +70,8 @@ export default function MeasurementsPage() {
       queryClient.invalidateQueries({ queryKey: ['measurements'] });
       queryClient.invalidateQueries({ queryKey: ['measurementStats'] });
       setForm({
-        neck: '', chest: '', waist: '', hips: '',
-        bicep: '', forearm: '', thigh: '', calf: '',
+        neck: '', chest: '', shoulder: '', waist: '', hips: '',
+        bicep: '', forearm: '', wrist: '', thigh: '', calf: '',
         note: '',
       });
       setShowForm(false);
@@ -259,7 +261,7 @@ const fmt = (n: number): string =>
               <span>{t('measurements.hint')}</span>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {FIELDS.map((field) => {
                 const FieldIcon = field.Icon;
                 return (

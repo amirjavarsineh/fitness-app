@@ -310,7 +310,7 @@ export default function DashboardPage() {
               onClick={() => navigate('/progress')}
             />
           ) : (
-            <div style={{ width: '100%', height: 250 }}>
+                        <div style={{ width: '100%', height: 250 }} dir="ltr">
               <ResponsiveContainer>
                 <LineChart
                   data={weightChartData}
@@ -346,7 +346,7 @@ export default function DashboardPage() {
           manageText={t('dashboard.manage')}
           delay="delay-5"
         >
-          <div style={{ width: '100%', height: 250 }}>
+                    <div style={{ width: '100%', height: 250 }} dir="ltr">
             <ResponsiveContainer>
               <LineChart
                 data={caloriesChartData}
@@ -389,7 +389,7 @@ export default function DashboardPage() {
           manageText={t('dashboard.manage')}
           delay="delay-6"
         >
-          <div style={{ width: '100%', height: 250 }}>
+                    <div style={{ width: '100%', height: 250 }} dir="ltr">
             <ResponsiveContainer>
               <BarChart
                 data={waterChartData}
@@ -425,7 +425,7 @@ export default function DashboardPage() {
           manageText={t('dashboard.manage')}
           delay="delay-7"
         >
-          <div style={{ width: '100%', height: 250 }}>
+                   <div style={{ width: '100%', height: 250 }} dir="ltr">
             <ResponsiveContainer>
               <BarChart
                 data={workoutsChartData}

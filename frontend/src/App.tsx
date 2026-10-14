@@ -31,6 +31,16 @@ const PredictionPage = lazy(() => import('./pages/PredictionPage'));
 const GoalListPage = lazy(() => import('./pages/goals/GoalListPage'));
 const GoalFormPage = lazy(() => import('./pages/goals/GoalFormPage'));
 const InstallAppPage = lazy(() => import('./pages/InstallAppPage'));
+const CoachPage = lazy(() => import('./pages/coach/CoachPage'));
+const ProgramsListPage = lazy(() => import('./pages/programs/ProgramsListPage'));
+const ProgramFormPage = lazy(() => import('./pages/programs/ProgramFormPage'));
+const ProgramDetailPage = lazy(() => import('./pages/programs/ProgramDetailPage'));
+const MyProgramsPage = lazy(() => import('./pages/programs/MyProgramsPage'));
+const ProgramsHubPage = lazy(() => import('./pages/programs/ProgramsHubPage'));
+const ProgramDayProgressPage = lazy(() => import('./pages/programs/ProgramDayProgressPage'));
+const MyProgressPage = lazy(() => import('./pages/programs/MyProgressPage'));
+const CalculationsPage = lazy(() => import('./pages/CalculationsPage'));
+const StudentProgressPage = lazy(() => import('./pages/coach/StudentProgressPage'));
 
 
 // صفحه‌ی لودینگ که موقع انتظار نشون داده می‌شه
@@ -81,6 +91,16 @@ export default function App() {
               <Route path="/export" element={<ExportPage />} />
               <Route path="/achievements" element={<AchievementsPage />} />
               <Route path="/install" element={<InstallAppPage />} />
+              <Route path="/coach" element={<CoachPage />} />
+              <Route path="/programs" element={<ProgramsHubPage />} />
+              <Route path="/programs/new" element={<ProgramFormPage />} />
+              <Route path="/programs/:id" element={<ProgramDetailPage />} />
+              <Route path="/programs/:id/edit" element={<ProgramFormPage />} />
+              <Route path="/my-programs" element={<MyProgramsPage />} />
+              <Route path="/my-programs/:assignmentId/day/:dayId" element={<ProgramDayProgressPage />} />
+              <Route path="/my-progress" element={<MyProgressPage />} />
+              <Route path="/calculations" element={<CalculationsPage />} />
+              <Route path="/student-progress/:studentId" element={<StudentProgressPage />} />
 
               <Route path="/goals" element={<GoalListPage />} />
               <Route path="/goals/new" element={<GoalFormPage />} />

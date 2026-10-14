@@ -1,12 +1,12 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { AuthRequest } from '../middlewares/auth.middleware';
-import { todayTehran } from '../lib/dates';
+import { toTehranDateKey, dateKeyToDbDate } from '../lib/dates';
 
 export const getTodayWater = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
-    const today = todayTehran();
+    const today = dateKeyToDbDate(toTehranDateKey(new Date()))
 
     const [log, user] = await Promise.all([
       prisma.waterLog.findUnique({
@@ -48,7 +48,7 @@ export const addWater = async (req: AuthRequest, res: Response): Promise<void> =
       return;
     }
 
-    const today = todayTehran();
+    const today = dateKeyToDbDate(toTehranDateKey(new Date()))
 
     const existing = await prisma.waterLog.findUnique({
       where: { userId_date: { userId, date: today } },
@@ -70,7 +70,7 @@ export const addWater = async (req: AuthRequest, res: Response): Promise<void> =
 export const resetTodayWater = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
-    const today = todayTehran();
+    const today = dateKeyToDbDate(toTehranDateKey(new Date()))
 
     await prisma.waterLog.deleteMany({
       where: { userId, date: today },
@@ -87,7 +87,7 @@ export const getWaterStats = async (req: AuthRequest, res: Response): Promise<vo
   try {
     const userId = req.userId!;
 
-    const today = todayTehran();
+    const today = dateKeyToDbDate(toTehranDateKey(new Date()))
     const weekStart = new Date(today);
     weekStart.setDate(weekStart.getDate() - 6);
 

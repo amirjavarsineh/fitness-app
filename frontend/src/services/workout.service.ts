@@ -26,6 +26,8 @@ export interface Workout {
   notes: string | null;
   date: string;
   isTemplate?: boolean;
+  isCompleted: boolean;
+  completedAt: string | null;
   exercises: WorkoutExercise[];
   createdAt: string;
   updatedAt: string;
@@ -82,5 +84,12 @@ export const workoutService = {
 
   deleteWorkout: async (id: string): Promise<void> => {
     await api.delete(`/workouts/${id}`);
+  },
+
+  toggleComplete: async (id: string): Promise<Workout> => {
+    const res = await api.patch<{ success: boolean; workout: Workout }>(
+      `/workouts/${id}/toggle-complete`
+    );
+    return res.data.workout;
   },
 };

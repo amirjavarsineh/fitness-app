@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { toTehranDateKey, dateKeyToDbDate } from '../lib/dates';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
 // گرفتن همه اندازه‌ها
@@ -25,8 +26,10 @@ export const upsertMeasurement = async (req: AuthRequest, res: Response): Promis
     const userId = req.userId!;
     const { date, neck, chest, waist, hips, bicep, forearm, thigh, calf, note } = req.body;
 
-    const dateObj = date ? new Date(date) : new Date();
-    dateObj.setHours(0, 0, 0, 0);
+      const dateKey = date
+      ? toTehranDateKey(new Date(date))
+      : toTehranDateKey(new Date());
+    const dateObj = dateKeyToDbDate(dateKey);
 
     // تبدیل به عدد یا null
     const toNum = (v: unknown) => {

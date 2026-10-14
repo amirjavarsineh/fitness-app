@@ -36,6 +36,13 @@ export default function ProgressPage() {
   const [showForm, setShowForm] = useState(false);
   const [weight, setWeight] = useState('');
   const [note, setNote] = useState('');
+    const [weightDate, setWeightDate] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  });
   const [error, setError] = useState('');
 
   const { data: logs, isLoading: logsLoading } = useQuery({
@@ -58,6 +65,11 @@ export default function ProgressPage() {
       setNote('');
       setShowForm(false);
       setError('');
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      setWeightDate(`${y}-${m}-${day}`);
     },
     onError: () => setError(t('progress.saveError')),
   });
@@ -80,6 +92,7 @@ export default function ProgressPage() {
     }
     upsertMutation.mutate({
       weight: w,
+      date: weightDate,
       note: note.trim() || undefined,
     });
   };
@@ -234,7 +247,7 @@ const fmt = (n: number): string =>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                   {t('progress.weightLabel')} *
@@ -246,6 +259,18 @@ const fmt = (n: number): string =>
                   onChange={(e) => setWeight(e.target.value)}
                   placeholder={t('progress.weightPlaceholder')}
                   className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-violet-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-violet-500/10"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('progress.dateLabel' as never)}
+                </label>
+                <input
+                  type="date"
+                  value={weightDate}
+                  onChange={(e) => setWeightDate(e.target.value)}
+                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white outline-none transition-all focus:border-violet-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-violet-500/10"
                 />
               </div>
 

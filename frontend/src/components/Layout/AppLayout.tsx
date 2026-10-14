@@ -15,6 +15,9 @@ import {
   Award,
   Target,
   Download,
+  Calculator,
+  Crown,
+  ClipboardList,
   User,
   LogOut,
   Sun,
@@ -44,6 +47,12 @@ const NAV_ITEMS = [
   { to: '/report', labelKey: 'nav.report', Icon: BarChart3, gradient: 'from-indigo-400 to-blue-500' },
   { to: '/achievements', labelKey: 'nav.achievements', Icon: Award, gradient: 'from-amber-400 to-yellow-500' },
   { to: '/goals', labelKey: 'nav.goals', Icon: Target, gradient: 'from-rose-400 to-pink-500' },
+  { to: '/coach', labelKey: 'nav.coach', Icon: Crown, gradient: 'from-amber-400 to-orange-500' },
+  { to: '/programs', labelKey: 'nav.programs', Icon: ClipboardList, gradient: 'from-blue-500 to-indigo-600' },
+
+  { to: '/my-progress', labelKey: 'nav.myProgress', Icon: TrendingUp, gradient: 'from-emerald-400 to-teal-500' },
+  { to: '/calculations', labelKey: 'nav.calculations', Icon: Calculator, gradient: 'from-violet-400 to-fuchsia-500' },
+  { to: '/install', labelKey: 'nav.installApp', Icon: Download, gradient: 'from-emerald-400 to-cyan-500' },
   { to: '/export', labelKey: 'nav.export', Icon: Download, gradient: 'from-slate-400 to-slate-500' },
   { to: '/profile', labelKey: 'nav.profile', Icon: User, gradient: 'from-emerald-400 to-cyan-500' },
 ] as const;

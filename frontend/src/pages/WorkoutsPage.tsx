@@ -11,6 +11,8 @@ import {
   Flame,
   Dumbbell,
   ClipboardList,
+  Check,
+  Circle,
 } from 'lucide-react';
 import { workoutService, type Workout } from '../services/workout.service';
 import { useTranslation } from '../i18n/useTranslation';
@@ -52,6 +54,13 @@ export default function WorkoutsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
       queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+  
+  const toggleCompleteMutation = useMutation({
+    mutationFn: workoutService.toggleComplete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
     },
   });
 
@@ -235,8 +244,13 @@ export default function WorkoutsPage() {
                   deleteMutation.mutate(workout.id);
                 }
               }}
+              
               onUse={() => useTemplateMutation.mutate(workout.id)}
               using={useTemplateMutation.isPending}
+              onToggleComplete={() =>
+                toggleCompleteMutation.mutate(workout.id)
+              }
+              togglingComplete={toggleCompleteMutation.isPending}
               t={t}
             />
           ))}
@@ -254,6 +268,8 @@ function WorkoutCard({
   onDelete,
   onUse,
   using,
+  onToggleComplete,
+  togglingComplete,
   t,
 }: {
   workout: Workout;
@@ -263,6 +279,8 @@ function WorkoutCard({
   onDelete: () => void;
   onUse: () => void;
   using: boolean;
+  onToggleComplete: () => void;
+  togglingComplete: boolean;
   t: (key: never) => string;
 }) {
   const typeInfo = WORKOUT_TYPE_INFO[workout.type] ?? WORKOUT_TYPE_INFO.OTHER;
@@ -291,7 +309,52 @@ function WorkoutCard({
           </div>
         </div>
 
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 truncate group-hover:text-transparent group-hover:bg-gradient-to-l group-hover:from-slate-900 group-hover:to-slate-600 dark:group-hover:from-white dark:group-hover:to-slate-300 group-hover:bg-clip-text transition-all">
+               {!isTemplate && (
+          <button
+            onClick={onToggleComplete}
+            disabled={togglingComplete}
+            className={`w-full flex items-center gap-3 p-3 mb-3 rounded-2xl transition-all disabled:opacity-50 ${
+              workout.isCompleted
+                ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-2 border-emerald-300 dark:border-emerald-700'
+                : 'bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700'
+            }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                workout.isCompleted
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+              }`}
+            >
+              {workout.isCompleted ? (
+                <Check size={18} strokeWidth={3} />
+              ) : (
+                <Circle size={18} strokeWidth={2.5} />
+              )}
+            </div>
+            <div className="flex-1 text-start min-w-0">
+              <p
+                className={`text-sm font-bold ${
+                  workout.isCompleted
+                    ? 'text-emerald-700 dark:text-emerald-300'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {workout.isCompleted
+                  ? t('workouts.completedLabel' as never)
+                  : t('workouts.notCompletedLabel' as never)}
+              </p>
+            </div>
+          </button>
+        )}
+
+        <h3
+          className={`text-lg font-bold mb-3 truncate transition-all ${
+            workout.isCompleted
+              ? 'text-emerald-700 dark:text-emerald-300 line-through opacity-80'
+              : 'text-slate-900 dark:text-white group-hover:text-transparent group-hover:bg-gradient-to-l group-hover:from-slate-900 group-hover:to-slate-600 dark:group-hover:from-white dark:group-hover:to-slate-300 group-hover:bg-clip-text'
+          }`}
+        >
           {workout.name ?? '—'}
         </h3>
 

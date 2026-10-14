@@ -98,6 +98,7 @@ export const createWorkout = async (req: AuthRequest, res: Response): Promise<vo
         caloriesBurned: caloriesBurned ? Number(caloriesBurned) : null,
         notes: notes ?? null,
         isTemplate: isTemplate ?? false,
+        isCompleted: false,
         exercises: {
           create: Array.isArray(exercises)
             ? exercises.map((ex: any, idx: number) => ({
@@ -203,6 +204,44 @@ export const deleteWorkout = async (req: AuthRequest, res: Response): Promise<vo
     res.json({ success: true, message: 'Workout deleted' });
   } catch (error) {
     console.error('deleteWorkout error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
+// ===== تغییر وضعیت انجام تمرین =====
+export const toggleWorkoutComplete = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    const workoutId = req.params.id as string;
+
+    const workout = await prisma.workout.findFirst({
+      where: { id: workoutId, userId },
+    });
+
+    if (!workout) {
+      res.status(404).json({ success: false, message: 'Workout not found' });
+      return;
+    }
+
+    const isCompleted = !workout.isCompleted;
+
+    const updated = await prisma.workout.update({
+      where: { id: workoutId },
+      data: {
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null,
+      },
+      include: { exercises: { orderBy: { order: 'asc' } } },
+    });
+
+    res.json({ success: true, workout: updated });
+  } catch (error) {
+    console.error('toggleWorkoutComplete error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

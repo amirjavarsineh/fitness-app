@@ -23,6 +23,10 @@ import reminderRouter from './routes/reminder.routes';
 import challengeRouter from './routes/challenge.routes';
 import xpRouter from './routes/xp.routes';
 import predictionRouter from './routes/prediction.routes';
+import coachRouter from './routes/coach.routes';
+import programRouter from './routes/program.routes';
+import progressProgramRouter from './routes/progress-program.routes';
+import calculationsRouter from './routes/calculations.routes';
 
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -115,6 +119,10 @@ app.use('/api/reminders', reminderRouter);
 app.use('/api/challenges', challengeRouter);
 app.use('/api/xp', xpRouter);
 app.use('/api/predictions', predictionRouter);
+app.use('/api/coach', coachRouter);
+app.use('/api/programs', programRouter);
+app.use('/api/progress-program', progressProgramRouter);
+app.use('/api/calculations', calculationsRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

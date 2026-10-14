@@ -251,8 +251,8 @@ export default function WorkoutFormPage() {
                 )}
               </div>
 
-              {/* Duration + Date */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Duration + Calories + Date */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     <span className="inline-flex items-center gap-1.5">
@@ -276,6 +276,29 @@ export default function WorkoutFormPage() {
                       <span>{errors.duration.message}</span>
                     </p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Flame size={14} strokeWidth={2.5} />
+                      {t('workouts.caloriesBurnedLabel' as never)}
+                    </span>
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder={t('common.optional' as never) as string}
+                    {...register('caloriesBurned', {
+                      setValueAs: (v) =>
+                        v === '' || v === null ? null : Number(v),
+                    })}
+                    className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    {t('workouts.caloriesBurnedHint' as never)}
+                  </p>
                 </div>
 
                 <div>
