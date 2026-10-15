@@ -26,7 +26,7 @@
 
 ### 🎯 درباره پروژه
 
-**اپلیکیشن تناسب اندام** یک برنامه‌ی کامل و مدرن برای ردیابی تمرینات، تغذیه، آب، وزن و اهداف شماست. این پروژه با تکنولوژی‌های روز ساخته شده و شامل **۱۹ صفحه‌ی کاربری**، **۱۶ مدل دیتابیس**، و **۶۰+ API Endpoint** می‌باشد.
+**اپلیکیشن تناسب اندام** یک برنامه‌ی کامل و مدرن برای ردیابی تمرینات، تغذیه، آب، وزن و اهداف شماست. این پروژه با تکنولوژی‌های روز ساخته شده و شامل **۳۱ صفحه‌ی کاربری**، **۲۵ مدل دیتابیس**، و **۸۵+ API Endpoint** می‌باشد.
 
 **ویژگی‌های کلیدی:**
 - 🌐 **دوزبانه** (فارسی + انگلیسی) با تغییر لحظه‌ای
@@ -35,6 +35,8 @@
 - 🔒 **امنیت** — bcrypt + JWT + Rate Limiting
 - ⚡ **سریع** — Lazy Loading + Smart Caching
 - 🕐 **Timezone هوشمند** — همه‌ی تاریخ‌ها بر اساس Asia/Tehran
+- 👨‍🏫 **سیستم مربی و شاگرد** با کد دعوت اختصاصی
+- 🧮 **۱۲ محاسبه‌ی پیشرفته‌ی بدنی** (BMI، BMR، TDEE، WHtR و...)
 
 ### ✨ امکانات
 
@@ -45,10 +47,12 @@
 #### 🏋️ ردیابی تمرینات
 - ساخت، ویرایش و حذف تمرینات
 - افزودن چند حرکت به هر تمرین
+- **چک‌باکس انجام تمرین** (Completed/Not Completed)
 - کاتالوگ **۶۱ تمرین آماده** با مقادیر MET
 - انتخاب‌گر هوشمند حرکت با جستجو
 - ذخیره تمرین به‌عنوان **قالب** برای استفاده سریع
 - ثبت تمرین برای **تاریخ‌های گذشته**
+- محاسبه‌ی خودکار کالری سوزانده با فرمول MET
 
 #### 🍎 ثبت تغذیه
 - ثبت غذا بر اساس وعده (صبحانه، ناهار، شام، میان‌وعده)
@@ -63,13 +67,13 @@
 - آمار هفتگی
 
 #### ⚖️ پیشرفت وزن
-- ثبت وزن روزانه
+- ثبت وزن برای **هر تاریخی**
 - نمودار خطی تعاملی
 - آمار: وزن فعلی، شروع، تغییر، کمینه، بیشینه
 
 #### 📏 اندازه‌های بدن
-- ثبت ۸ اندازه (گردن، سینه، کمر، باسن، بازو، ساعد، ران، ساق)
-- پیگیری تغییرات
+- ثبت **۱۰ اندازه** (گردن، سینه، شانه، کمر، باسن، بازو، ساعد، مچ، ران، ساق)
+- پیگیری تغییرات با نمایش صعودی/نزولی
 - تاریخچه‌ی کامل
 
 </td>
@@ -115,6 +119,53 @@
 - نقشه‌ی رتبه‌ها
 - نمایش breakdown امتیازات
 
+#### 🧮 محاسبات بدنی پیشرفته
+- **BMI** با نمودار رنگی و دسته‌بندی
+- **BMR** (فرمول Mifflin-St Jeor)
+- **TDEE** با ضریب فعالیت
+- **کالری هدف** بر اساس هدف کاربر
+- **درشت‌مغذی‌ها** (پروتئین، کربوهیدرات، چربی)
+- **هدف آب روزانه** خودکار
+- **درصد چربی بدن** (فرمول Navy)
+- **جرم بدون چربی** (Lean Body Mass)
+- **توده‌ی عضلانی اسکلتی** (SMM)
+- **FFMI** (شاخص عضله‌ی بدون چربی)
+- **نسبت دور کمر به باسن** (WHR)
+- **نسبت دور کمر به قد** (WHtR) — دقیق‌تر از BMI
+- **چربی احشایی** (Visceral Fat)
+- **نسبت شانه به کمر** (V-Taper)
+- **تناسب بالا/پائین‌تنه** (Symmetry)
+- **تیپ بدنی** (Somatotype: Ecto/Meso/Endo)
+- **اندازه‌ی اسکلت** (ریز/متوسط/درشت‌استخوان)
+- **سن متابولیک** — بدنت مثل چند ساله کار می‌کنه
+- **امتیاز سلامت کلی** (۰ تا ۱۰۰)
+
+#### 👨‍🏫 سیستم مربی و شاگرد
+- فعال‌سازی حالت مربی با **کد اختصاصی** (مثل `FIT-A3B5C7`)
+- اتصال شاگرد به مربی با کد
+- مدیریت شاگردها
+- قطع ارتباط دوطرفه
+
+#### 📋 برنامه‌های تمرینی
+- ساخت برنامه‌ی **هفتگی / روزانه / دوره‌ای**
+- تعریف روزها و حرکات با ست، تکرار، وزن، استراحت و یادداشت
+- ذخیره به‌عنوان **قالب** برای استفاده‌ی مجدد
+- دادن برنامه به **چند شاگرد**
+- ویرایش هوشمند (حفظ تاریخچه‌ی شاگرد)
+
+#### ✅ چک‌لیست تمرین شاگرد
+- نمایش برنامه‌ی دریافتی
+- تیک‌زدن هر حرکت
+- ثبت مقدار واقعی (ست، تکرار، وزن، زمان)
+- یادداشت شخصی برای هر حرکت
+- تاریخ انتخابی (پیش‌فرض امروز)
+
+#### 📈 نمودار پیشرفت شاگرد (برای مربی)
+- کارت‌های آمار (کل جلسات، تکمیل‌شده، درصد)
+- نمودار هفتگی فعالیت
+- لیست جلسات با جزئیات کامل
+- مشاهده‌ی هر جلسه (چه حرکاتی انجام شده، چقدر زمان برده)
+
 #### 📥 دانلود داده‌ها
 - خروجی همه‌ی داده‌ها به فرمت CSV
 - پشتیبانی کامل از فارسی (UTF-8 BOM)
@@ -150,6 +201,7 @@
 | React Hook Form | Form Handling |
 | Recharts | Charts |
 | vite-plugin-pwa | PWA Support |
+| Lucide React | Icons |
 
 
 ### 🚀 راه‌اندازی
@@ -229,11 +281,13 @@ npm run dev
 - ✅ **Auto Update** — نسخه‌ی جدید خودکار اعمال می‌شه
 - ✅ **RTL Support** — مناسب برای فارسی
 - ✅ **Theme Color** — نوار مرورگر هم‌رنگ اپ
+- ✅ **صفحه‌ی نصب اختصاصی** — راهنمای قدم‌به‌قدم برای Android/iOS/Desktop
 
 **نصب:**
 1. اپ رو در مرورگر باز کن
 2. بنر «نصب اپلیکیشن» ظاهر می‌شه → بزن «نصب کن»
-3. اپ روی صفحه‌ی اصلی قرار می‌گیره
+3. یا از منو به صفحه‌ی **«نصب اپلیکیشن»** برو و راهنمای مخصوص دستگاهت رو دنبال کن
+4. اپ روی صفحه‌ی اصلی قرار می‌گیره
 
 ### 🌐 دوزبانه (i18n)
 
@@ -241,6 +295,7 @@ npm run dev
 - **انگلیسی (LTR)** برای کاربران بین‌المللی
 - **تغییر لحظه‌ای** بدون refresh
 - **ذخیره‌ی ترجیح** در localStorage
+- **اعداد هوشمند** — فارسی: ۱۲۳ / انگلیسی: 123
 - **ترجمه‌ی کامل** همه‌ی صفحات، پیام‌های خطا و اعلان‌ها
 
 ### 🔒 امنیت
@@ -253,6 +308,7 @@ npm run dev
 - ✅ **CORS** محدود به دامنه فرانت‌اند
 - ✅ اعتبارسنجی ورودی‌ها
 - ✅ جلوگیری از SQL Injection با Prisma
+- ✅ **احراز مالکیت** — همه‌ی کوئری‌ها با `userId` فیلتر می‌شن
 
 **نکته:** برای محصول تجاری، HttpOnly Cookies، Refresh Token، Email Verification و 2FA توصیه می‌شود.
 
@@ -261,6 +317,7 @@ npm run dev
 - همه‌ی تاریخ‌ها بر اساس **Asia/Tehran** محاسبه می‌شن
 - رکوردهای روزانه (آب، وزن، چک‌این) در نیمه‌شب تهران ثبت می‌شن
 - نمودارها با فرمت locale کاربر نمایش داده می‌شن
+- تابع `dateKeyToDbDate` برای ذخیره‌ی صحیح در ستون‌های `@db.Date`
 
 ### 🚢 دیپلوی
 
@@ -307,6 +364,10 @@ npm run build
 - [ ] **Social Login** (Google, Apple)
 - [ ] **Email Verification** + **Password Reset**
 - [ ] **2FA** (اختیاری با TOTP)
+- [ ] **پیام بین مربی و شاگرد**
+- [ ] **کامنت مربی روی جلسه‌ی شاگرد**
+- [ ] **برنامه‌ی غذایی توسط مربی**
+- [ ] **XP برای چک‌این‌های برنامه**
 - [ ] **اشتراک‌گذاری تمرین** با دوستان
 - [ ] **برنامه‌ریزی تمرین با AI**
 - [ ] **Apple Health / Google Fit** integration
@@ -362,6 +423,20 @@ npx prisma generate
 - فقط روی **HTTPS** یا **localhost** کار می‌کنه
 - مطمئن شو `vite-plugin-pwa` درست تنظیم شده
 - در Chrome: DevTools → Application → Manifest
+- برای تست در حالت development، `devOptions.enabled` رو `true` کن
+</details>
+
+<details>
+<summary><b>نمی‌تونم به شاگرد جدید برنامه بدم</b></summary>
+
+- مطمئن شو شاگرد بهت وصل شده (از صفحه‌ی «مربی»)
+- اگه مشکل ادامه داشت، صفحه رو **رفرش** کن (`Ctrl + Shift + R`) — لیست شاگردها رفرش می‌شه
+</details>
+
+<details>
+<summary><b>تاریخچه‌ی شاگرد بعد از ویرایش برنامه پاک می‌شه</b></summary>
+
+این مشکل در نسخه‌ی جدید حل شده. `updateProgram` به‌صورت **هوشمندانه** فقط چیزهایی که عوض شدن رو آپدیت می‌کنه و ID روزها و حرکات رو حفظ می‌کنه.
 </details>
 
 ### 📸 اسکرین‌شات‌ها
@@ -404,7 +479,7 @@ npx prisma generate
 | GET | `/api/profile` | دریافت پروفایل |
 | PUT | `/api/profile` | ذخیره یا ویرایش پروفایل |
 
-### 🏋️ Workouts (۷)
+### 🏋️ Workouts (۸)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/workouts` | لیست تمرینات |
@@ -413,6 +488,7 @@ npx prisma generate
 | GET | `/api/workouts/:id` | دریافت تمرین |
 | POST | `/api/workouts` | ساخت تمرین |
 | PUT | `/api/workouts/:id` | ویرایش تمرین |
+| PATCH | `/api/workouts/:id/toggle-complete` | تغییر وضعیت انجام |
 | DELETE | `/api/workouts/:id` | حذف تمرین |
 
 ### 🍎 Nutrition (۴)
@@ -505,6 +581,48 @@ npx prisma generate
 |--------|----------|-------------|
 | GET | `/api/predictions` | پیش‌بینی‌های هوشمند |
 
+### 🧮 Calculations (۴)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/calculations` | محاسبات کامل از پروفایل |
+| POST | `/api/calculations/instant` | محاسبه‌ی آنی |
+| POST | `/api/calculations/workout-calories` | کالری سوزانده‌شده |
+| POST | `/api/calculations/body-fat` | تخمین چربی بدن (Navy) |
+
+### 👨‍🏫 Coach (۷)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/coach/activate` | فعال‌سازی حالت مربی |
+| GET | `/api/coach/info` | اطلاعات مربی + شاگردها |
+| POST | `/api/coach/regenerate-code` | ساخت کد جدید |
+| POST | `/api/coach/join` | عضویت با کد |
+| GET | `/api/coach/my-coaches` | لیست مربی‌ها (برای شاگرد) |
+| DELETE | `/api/coach/students/:studentId` | حذف شاگرد |
+| DELETE | `/api/coach/coaches/:coachId` | قطع ارتباط با مربی |
+
+### 📋 Programs (۸)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/programs` | لیست برنامه‌های مربی |
+| POST | `/api/programs` | ساخت برنامه |
+| GET | `/api/programs/:id` | جزئیات برنامه |
+| PUT | `/api/programs/:id` | ویرایش هوشمند (حفظ تاریخچه) |
+| DELETE | `/api/programs/:id` | حذف |
+| POST | `/api/programs/:id/assign` | دادن به شاگرد |
+| DELETE | `/api/programs/assignments/:assignmentId` | پس گرفتن |
+| GET | `/api/programs/assigned` | برنامه‌های دریافتی (برای شاگرد) |
+
+### ✅ Program Progress (۷)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/progress-program/assignment/:assignmentId/day/:dayId` | گرفتن یا ساختن progress |
+| PUT | `/api/progress-program/:progressId/exercise/:exerciseId` | آپدیت حرکت |
+| PUT | `/api/progress-program/:id` | آپدیت کل progress |
+| GET | `/api/progress-program/assignment/:assignmentId/history` | تاریخچه |
+| GET | `/api/progress-program/summary/me` | خلاصه‌ی پیشرفت خودم |
+| GET | `/api/progress-program/student/:studentId` | پیشرفت شاگرد (برای مربی) |
+| GET | `/api/progress-program/detail/:progressId` | جزئیات یک progress |
+
 ### 📥 Export (۵)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -534,7 +652,7 @@ npx prisma generate
 
 ### 🎯 About
 
-**Fitness App** is a complete and modern application for tracking your workouts, nutrition, water intake, weight, and goals. Built with modern technologies, featuring **19 UI pages**, **16 database models**, and **60+ API endpoints**.
+**Fitness App** is a complete and modern application for tracking your workouts, nutrition, water intake, weight, and goals. Built with modern technologies, featuring **31 UI pages**, **25 database models**, and **85+ API endpoints**.
 
 **Key Highlights:**
 - 🌐 **Bilingual** (Persian + English) with instant switching
@@ -543,6 +661,8 @@ npx prisma generate
 - 🔒 **Security** — bcrypt + JWT + Rate Limiting
 - ⚡ **Fast** — Lazy Loading + Smart Caching
 - 🕐 **Smart Timezone** — all dates based on Asia/Tehran
+- 👨‍🏫 **Coach & Student system** with unique invite codes
+- 🧮 **12 advanced body calculations** (BMI, BMR, TDEE, WHtR, etc.)
 
 ### ✨ Features
 
@@ -553,10 +673,12 @@ npx prisma generate
 #### 🏋️ Workout Tracking
 - Create, edit, and delete workouts
 - Add multiple exercises per workout
+- **Completion checkbox** (Completed/Not Completed)
 - **61 pre-loaded exercises** with MET values
 - Smart exercise picker with search
 - Save workouts as **templates** for quick reuse
 - Log workouts for **past dates**
+- Auto-calculate calories burned via MET formula
 
 #### 🍎 Nutrition Logging
 - Log meals by category (Breakfast, Lunch, Dinner, Snack)
@@ -571,13 +693,13 @@ npx prisma generate
 - Weekly statistics
 
 #### ⚖️ Weight Progress
-- Log daily weight
+- Log weight for **any date**
 - Interactive line chart
 - Stats: current, start, change, min, max
 
 #### 📏 Body Measurements
-- Track 8 measurements (neck, chest, waist, hips, bicep, forearm, thigh, calf)
-- Track changes over time
+- Track **10 measurements** (neck, chest, shoulder, waist, hips, bicep, forearm, wrist, thigh, calf)
+- Track changes with up/down indicators
 - Full history
 
 </td>
@@ -623,6 +745,53 @@ npx prisma generate
 - Rank roadmap
 - XP breakdown view
 
+#### 🧮 Advanced Body Calculations
+- **BMI** with color-coded chart
+- **BMR** (Mifflin-St Jeor formula)
+- **TDEE** with activity multiplier
+- **Target Calories** based on goal
+- **Macros** (Protein, Carbs, Fat)
+- **Daily Water Goal** — auto
+- **Body Fat %** (Navy formula)
+- **Lean Body Mass**
+- **Skeletal Muscle Mass** (SMM)
+- **FFMI** (Fat-Free Mass Index)
+- **Waist-to-Hip Ratio** (WHR)
+- **Waist-to-Height Ratio** (WHtR) — more accurate than BMI
+- **Visceral Fat**
+- **Shoulder-to-Waist Ratio** (V-Taper)
+- **Upper/Lower Body Symmetry**
+- **Somatotype** (Ecto/Meso/Endo)
+- **Frame Size** (Small/Medium/Large)
+- **Metabolic Age** — how old your body functions as
+- **Health Score** (0 to 100)
+
+#### 👨‍🏫 Coach & Student System
+- Activate coach mode with **unique code** (e.g. `FIT-A3B5C7`)
+- Students join via code
+- Manage student list
+- Bidirectional disconnect
+
+#### 📋 Training Programs
+- Create **Weekly / Daily / Periodic** programs
+- Define days and exercises with sets, reps, weight, rest, notes
+- Save as **templates** for reuse
+- Assign program to **multiple students**
+- Smart edit (preserves student history)
+
+#### ✅ Student Workout Checklist
+- View assigned program
+- Check off each exercise
+- Log actual values (sets, reps, weight, time)
+- Personal note per exercise
+- Selectable date (default: today)
+
+#### 📈 Student Progress Chart (for Coach)
+- Stat cards (total sessions, completed, %)
+- Weekly activity chart
+- Session list with full details
+- View each session (which exercises, how long)
+
 #### 📥 Data Export
 - Export all data to CSV
 - Full UTF-8 Persian support
@@ -658,7 +827,7 @@ npx prisma generate
 | React Hook Form | Form Handling |
 | Recharts | Charts |
 | vite-plugin-pwa | PWA Support |
-
+| Lucide React | Icons |
 
 
 ### 🚀 Getting Started
@@ -738,11 +907,13 @@ The application is fully **PWA-enabled** and can be installed on mobile and desk
 - ✅ **Auto Update** — new versions auto-apply
 - ✅ **RTL Support** — Persian-friendly
 - ✅ **Theme Color** — browser bar matches app
+- ✅ **Dedicated install page** — step-by-step guide for Android/iOS/Desktop
 
 **Install:**
 1. Open app in browser
 2. "Install App" banner appears → click "Install"
-3. App added to home screen
+3. Or go to the **"Install App"** page from the menu and follow device-specific steps
+4. App added to home screen
 
 ### 🌐 Bilingual (i18n)
 
@@ -750,6 +921,7 @@ The application is fully **PWA-enabled** and can be installed on mobile and desk
 - **English (LTR)** for international users
 - **Instant switching** without refresh
 - **Preference saved** in localStorage
+- **Smart numbers** — Persian: ۱۲۳ / English: 123
 - **Complete translation** of all pages, error messages, and notifications
 
 ### 🔒 Security
@@ -762,6 +934,7 @@ The application is fully **PWA-enabled** and can be installed on mobile and desk
 - ✅ **CORS** restricted to frontend origin
 - ✅ Input validation on all endpoints
 - ✅ SQL injection protection via Prisma
+- ✅ **Ownership check** — all queries filtered by `userId`
 
 **Note:** For production, HttpOnly Cookies, Refresh Tokens, Email Verification, and 2FA are recommended.
 
@@ -770,6 +943,7 @@ The application is fully **PWA-enabled** and can be installed on mobile and desk
 - All dates computed based on **Asia/Tehran**
 - Daily records (water, weight, check-in) stored at Tehran midnight
 - Charts formatted based on user's locale
+- `dateKeyToDbDate` helper for correct storage in `@db.Date` columns
 
 ### 🚢 Deployment
 
@@ -816,6 +990,10 @@ npm run build
 - [ ] **Social Login** (Google, Apple)
 - [ ] **Email Verification** + **Password Reset**
 - [ ] **2FA** (optional with TOTP)
+- [ ] **Coach-Student messaging**
+- [ ] **Coach comments on sessions**
+- [ ] **Nutrition plan by coach**
+- [ ] **XP for program check-ins**
 - [ ] **Share workouts** with friends
 - [ ] **AI Workout Planning**
 - [ ] **Apple Health / Google Fit** integration
@@ -871,6 +1049,20 @@ All dates should follow **Asia/Tehran** timezone. If server is UTC, this is expe
 - Works only over **HTTPS** or **localhost**
 - Ensure `vite-plugin-pwa` is properly configured
 - In Chrome: DevTools → Application → Manifest
+- For dev mode, set `devOptions.enabled` to `true`
+</details>
+
+<details>
+<summary><b>Cannot assign program to new student</b></summary>
+
+- Make sure the student is connected to you (from the "Coach" page)
+- If the issue persists, refresh the page (`Ctrl + Shift + R`) — this refetches the student list
+</details>
+
+<details>
+<summary><b>Student history erased after editing program</b></summary>
+
+This is fixed in the latest version. `updateProgram` now **smartly** updates only what changed and preserves the IDs of days and exercises.
 </details>
 
 ### 📸 Screenshots
@@ -913,7 +1105,7 @@ Suggestions, bug reports, and PRs are welcome!
 | GET | `/api/profile` |
 | PUT | `/api/profile` |
 
-### 🏋️ Workouts (7)
+### 🏋️ Workouts (8)
 | Method | Endpoint |
 |--------|----------|
 | GET | `/api/workouts` |
@@ -922,6 +1114,7 @@ Suggestions, bug reports, and PRs are welcome!
 | GET | `/api/workouts/:id` |
 | POST | `/api/workouts` |
 | PUT | `/api/workouts/:id` |
+| PATCH | `/api/workouts/:id/toggle-complete` |
 | DELETE | `/api/workouts/:id` |
 
 ### 🍎 Nutrition (4)
@@ -1013,6 +1206,48 @@ Suggestions, bug reports, and PRs are welcome!
 | Method | Endpoint |
 |--------|----------|
 | GET | `/api/predictions` |
+
+### 🧮 Calculations (4)
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/calculations` |
+| POST | `/api/calculations/instant` |
+| POST | `/api/calculations/workout-calories` |
+| POST | `/api/calculations/body-fat` |
+
+### 👨‍🏫 Coach (7)
+| Method | Endpoint |
+|--------|----------|
+| POST | `/api/coach/activate` |
+| GET | `/api/coach/info` |
+| POST | `/api/coach/regenerate-code` |
+| POST | `/api/coach/join` |
+| GET | `/api/coach/my-coaches` |
+| DELETE | `/api/coach/students/:studentId` |
+| DELETE | `/api/coach/coaches/:coachId` |
+
+### 📋 Programs (8)
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/programs` |
+| POST | `/api/programs` |
+| GET | `/api/programs/:id` |
+| PUT | `/api/programs/:id` |
+| DELETE | `/api/programs/:id` |
+| POST | `/api/programs/:id/assign` |
+| DELETE | `/api/programs/assignments/:assignmentId` |
+| GET | `/api/programs/assigned` |
+
+### ✅ Program Progress (7)
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/progress-program/assignment/:assignmentId/day/:dayId` |
+| PUT | `/api/progress-program/:progressId/exercise/:exerciseId` |
+| PUT | `/api/progress-program/:id` |
+| GET | `/api/progress-program/assignment/:assignmentId/history` |
+| GET | `/api/progress-program/summary/me` |
+| GET | `/api/progress-program/student/:studentId` |
+| GET | `/api/progress-program/detail/:progressId` |
 
 ### 📥 Export (5)
 | Method | Endpoint |
